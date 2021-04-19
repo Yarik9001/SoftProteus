@@ -91,6 +91,7 @@ if __name__ == '__main__':
 '''
 # print('hello world')
 
+# получение ip adress
 # import socket
 # print(socket.gethostbyname(socket.getfqdn()))
-print('joystick polling rate'.upper())
+

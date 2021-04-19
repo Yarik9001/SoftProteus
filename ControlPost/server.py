@@ -3,6 +3,8 @@ import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
+from pyPS4Controller.controller import Controller # модуль для работы с джойстиком ps2
+
 
 
 class ServerMainPult:
@@ -15,12 +17,15 @@ class ServerMainPult:
         self.HOST = "127.0.0.1"
         self.PORT = 1234
         self.JOYSTICKRATE = 0.1
-        self.massControl = {'time': 0,
-                            'x': 0, 'y': 0, 'z': 0,
-                            'led': False,
-                            'manipul': 0,
-                            'servo-x1': 0, 'servo-y1': 0,
-                            'servo-x2': 0, 'servo-y2': 0}  # словарик для отправки на аппарат
+        self.MotorPowerValue = 1
+        self.massControl = {'time': 0, # Текущее время 
+                            'motorpowervalue': 1, # мощность моторов
+                            'x': 0, 'y': 0, 'z': 0, # по идее мощность моторов  
+                            'led': False, # управление светом 
+                            'manipul': 0, # Управление манипулятором 
+                            'servo-x1': 0, 'servo-y1': 0, # управление подвесом курсовой камеры
+                            'servo-x2': 0, 'servo-y2': 0} # управление подвесом обзорной камеры 
+                            # словарик для отправки на аппарат
 
         self.log = log  # флаг логирования
         self.logcmd = logcmd
@@ -122,6 +127,14 @@ class LogerTXT:
             self.file.write(inf+'\n')
             sleep(self.RATELOG)
             self.file.close()
+    
+    def VisualizationLog():
+        # TODO визуализация логов 
+        pass
+
+class MyController(Controller):
+    # TODO класс взаимодействия с джойстиком 
+    pass
 
 
 if __name__ == '__main__':
