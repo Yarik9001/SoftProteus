@@ -1,4 +1,5 @@
 # Не обращайте внимания это просто свалка всякого потенцеально полезного (не точно)
+'''
 def logger_txt_print(tekst: str):  # запись логов в txt файл
     print(tekst)
     file = open('logi/log.txt', 'a+')
@@ -81,10 +82,15 @@ print_time.start()
 if __name__ == '__main__':
     start_server()
 
-'''
+
 Тип	Битрейт видео, стандартная частота кадров (24, 25, 30)	Битрейт видео, высокая частота кадров (48, 50, 60)
 2160p (4К)             	 35–45 Мбит/с	                             53–68 Мбит/с
 1440p (2К)	             16 Мбит/c                                   24 Мбит/c
 1080p	                 8 Мбит/c                                    12 Мбит/c
 720p	                 5 Мбит/                                     7,5 Мбит/c
 '''
+# print('hello world')
+
+# import socket
+# print(socket.gethostbyname(socket.getfqdn()))
+print('joystick polling rate'.upper())
