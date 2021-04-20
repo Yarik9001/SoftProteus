@@ -4,6 +4,9 @@ from datetime import datetime  # получение  времени
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from pyPS4Controller.controller import Controller # модуль для работы с джойстиком ps2
+# часть связанная с графическим интерфейсом 
+import sys 
+from PyQt5 import QtCore, QtWidgets
 
 
 
@@ -108,9 +111,12 @@ class LogerTXT:
     def __init__(self, name):
         self.RATELOG = 1
         time = '-'.join('-'.join('-'.join(str(datetime.now()
-                                              ).split()).split('.')).split(':'))
+                                            ).split()).split('.')).split(':'))
         self.name = "ControlPost/log/" + f'{name}-{time}.txt'
-        self.file = open(self.name, "a+")
+        try: # обработка ошибки с некорректным путем 
+            self.file = open(self.name, "a+")
+        except:
+            self.file = open(f'{name}-{time}.txt')
         # запись шапки
         self.file.write(f"Name: {name}\n")
         self.file.write(f'Time: {time}\n')
@@ -125,17 +131,100 @@ class LogerTXT:
             self.file = open(self.name, "a+")
             inf = str(pult.datainput)
             self.file.write(inf+'\n')
+            if pult.datainput['error'] !=None:
+                errorinf = pult.datainput['error']
+                self.file.write('ERROR :' + errorinf + '\n')
             sleep(self.RATELOG)
             self.file.close()
     
-    def VisualizationLog():
+    def VisualizationLog(self):
         # TODO визуализация логов 
         pass
 
 class MyController(Controller):
-    # TODO класс взаимодействия с джойстиком 
+    # TODO класс взаимодействия с джойстиком +-
     pass
 
 
+class Ui_MainWindow(object): # класс описывающий внешний вид приложения 
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(640, 480)
+        MainWindow.setStyleSheet("background-color: rgb(40, 40, 40);")
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar.setGeometry(QtCore.QRect(270, 380, 20, 71))
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar.setObjectName("progressBar")
+
+        self.progressBar_2 = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar_2.setGeometry(QtCore.QRect(300, 380, 20, 71))
+        self.progressBar_2.setProperty("value", 24)
+        self.progressBar_2.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar_2.setObjectName("progressBar_2")
+
+        self.progressBar_3 = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar_3.setGeometry(QtCore.QRect(330, 380, 20, 71))
+        self.progressBar_3.setProperty("value", 24)
+        self.progressBar_3.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar_3.setObjectName("progressBar_3")
+
+        self.progressBar_4 = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar_4.setGeometry(QtCore.QRect(360, 380, 20, 71))
+        self.progressBar_4.setProperty("value", 24)
+        self.progressBar_4.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar_4.setObjectName("progressBar_4")
+
+        self.progressBar_5 = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar_5.setGeometry(QtCore.QRect(390, 380, 20, 71))
+        self.progressBar_5.setProperty("value", 24)
+        self.progressBar_5.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar_5.setObjectName("progressBar_5")
+
+        self.progressBar_6 = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar_6.setGeometry(QtCore.QRect(420, 380, 20, 71))
+        self.progressBar_6.setProperty("value", 24)
+        self.progressBar_6.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar_6.setObjectName("progressBar_6")
+
+        self.dial = QtWidgets.QDial(self.centralwidget)
+        self.dial.setGeometry(QtCore.QRect(200, 380, 61, 71))
+        self.dial.setTracking(True)
+        self.dial.setObjectName("dial")
+
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 659, 25))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+
+
+class APPGui(): # класс описывающий приложение 
+    def __init__(self):
+        self.app = QtWidgets.QApplication(sys.argv)
+        self.MainWindow = QtWidgets.QMainWindow()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.MainWindow)
+    def main(self):
+        self.MainWindow.show()
+        sys.exit(self.app.exec_())
+
+
+
 if __name__ == '__main__':
-    Proteus = ServerMainPult(log=True, logcmd=True)
+    # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера 
+    QuiRov = APPGui()
+    QuiRov.main()

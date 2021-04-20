@@ -14,7 +14,7 @@ class ROVProteus:
         self.PORT = 1234
         self.logcmd =logcmd
         self.ratesensor = 0.5
-        self.rate 
+        self.rate = 1
 
         self.startclientmain()
         
@@ -30,7 +30,7 @@ class ROVProteus:
         if self.logcmd:
             print(data.decode("utf-8"))
     
-    def  startmultithreading(self):
+    def startmultithreading(self):
         # инициализауия потоков приема и передачи
         dispatch = threading.Thread(
             target=ROVProteus.CheckSensor, args=(self,))
@@ -58,6 +58,8 @@ class ROVProteus:
                                 'm1': 0,'m2': 0, 'm3': 0,
                                 'm4': 0, 'm5': 0, 'm6': 0,
                                 'Volt': 0,
+                                'error': None,
+                                'danger-error':False,
                                 'x':0, 'y':0,'z':0}
 
             # TODO опрос датчиков тока, глубины, 
