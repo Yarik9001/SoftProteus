@@ -208,9 +208,16 @@ class Ui_MainWindow(object):  # класс описывающий внешний
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+
+    def checkprogress(self,*args):
+        for i in range(100):
+            sleep(0.1)
+            print(i)
+            self.progressBar.setValue(i)
 
 
 class APPGui():  # класс описывающий приложение
@@ -221,8 +228,13 @@ class APPGui():  # класс описывающий приложение
         self.ui.setupUi(self.MainWindow)
 
     def main(self):
+        check = threading.Thread(
+            target=self.ui.checkprogress, args=(self.ui,))
+        check.start()
+        
         self.MainWindow.show()
         sys.exit(self.app.exec_())
+        
 
 
 if __name__ == '__main__':
