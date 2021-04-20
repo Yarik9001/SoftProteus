@@ -3,11 +3,11 @@ import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
-from pyPS4Controller.controller import Controller # модуль для работы с джойстиком ps2
-# часть связанная с графическим интерфейсом 
-import sys 
+# модуль для работы с джойстиком ps2
+from pyPS4Controller.controller import Controller
+# часть связанная с графическим интерфейсом
+import sys
 from PyQt5 import QtCore, QtWidgets
-
 
 
 class ServerMainPult:
@@ -21,14 +21,14 @@ class ServerMainPult:
         self.PORT = 1234
         self.JOYSTICKRATE = 0.1
         self.MotorPowerValue = 1
-        self.massControl = {'time': 0, # Текущее время 
-                            'motorpowervalue': 1, # мощность моторов
-                            'x': 0, 'y': 0, 'z': 0, # по идее мощность моторов  
-                            'led': False, # управление светом 
-                            'manipul': 0, # Управление манипулятором 
-                            'servo-x1': 0, 'servo-y1': 0, # управление подвесом курсовой камеры
-                            'servo-x2': 0, 'servo-y2': 0} # управление подвесом обзорной камеры 
-                            # словарик для отправки на аппарат
+        self.massControl = {'time': 0,  # Текущее время
+                            'motorpowervalue': 1,  # мощность моторов
+                            'x': 0, 'y': 0, 'z': 0,  # по идее мощность моторов
+                            'led': False,  # управление светом
+                            'manipul': 0,  # Управление манипулятором
+                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
+                            'servo-x2': 0, 'servo-y2': 0}  # управление подвесом обзорной камеры
+        # словарик для отправки на аппарат
 
         self.log = log  # флаг логирования
         self.logcmd = logcmd
@@ -111,9 +111,9 @@ class LogerTXT:
     def __init__(self, name):
         self.RATELOG = 1
         time = '-'.join('-'.join('-'.join(str(datetime.now()
-                                            ).split()).split('.')).split(':'))
+                                              ).split()).split('.')).split(':'))
         self.name = "ControlPost/log/" + f'{name}-{time}.txt'
-        try: # обработка ошибки с некорректным путем 
+        try:  # обработка ошибки с некорректным путем
             self.file = open(self.name, "a+")
         except:
             self.file = open(f'{name}-{time}.txt')
@@ -131,22 +131,23 @@ class LogerTXT:
             self.file = open(self.name, "a+")
             inf = str(pult.datainput)
             self.file.write(inf+'\n')
-            if pult.datainput['error'] !=None:
+            if pult.datainput['error'] != None:
                 errorinf = pult.datainput['error']
                 self.file.write('ERROR :' + errorinf + '\n')
             sleep(self.RATELOG)
             self.file.close()
-    
+
     def VisualizationLog(self):
-        # TODO визуализация логов 
+        # TODO визуализация логов
         pass
+
 
 class MyController(Controller):
     # TODO класс взаимодействия с джойстиком +-
     pass
 
 
-class Ui_MainWindow(object): # класс описывающий внешний вид приложения 
+class Ui_MainWindow(object):  # класс описывающий внешний вид приложения
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(640, 480)
@@ -212,19 +213,19 @@ class Ui_MainWindow(object): # класс описывающий внешний 
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
 
-class APPGui(): # класс описывающий приложение 
+class APPGui():  # класс описывающий приложение
     def __init__(self):
         self.app = QtWidgets.QApplication(sys.argv)
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
+
     def main(self):
         self.MainWindow.show()
         sys.exit(self.app.exec_())
 
 
-
 if __name__ == '__main__':
-    # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера 
+    # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
     QuiRov = APPGui()
     QuiRov.main()
