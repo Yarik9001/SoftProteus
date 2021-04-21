@@ -94,9 +94,10 @@ if __name__ == '__main__':
 # получение ip adress
 # import socket
 # print(socket.gethostbyname(socket.getfqdn()))
+from configparser import  ConfigParser
 
-import time
-import board
-import busio
-import adafruit_ads1x15.ads1015 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+config = ConfigParser()  # создаём объекта парсера
+config.read("settings.ini")  # читаем конфиг
+
+print(config["Twitter"]["username"])  # обращаемся как к обычному словарю!
+# 'johndoe'
