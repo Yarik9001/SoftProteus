@@ -17,7 +17,7 @@ class ServerMainPult:
     '''
 
     def __init__(self, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01):
-        # init variable
+        # инициализация атрибутов 
         self.HOST = host
         self.PORT = port
         self.JOYSTICKRATE = joystickrate 
@@ -39,7 +39,7 @@ class ServerMainPult:
         self.startservermain()  # поднимаем сервер
 
     def settingServer(self):
-        # setting server
+        # настройка сервера 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
         self.server.bind((self.HOST, self.PORT))
         self.server.listen()
@@ -91,12 +91,17 @@ class ServerMainPult:
         dispatch = threading.Thread(
             target=self.ControlProteus, args=(self,))
 
-        logthread = threading.Thread(
-            target=self.loger.writelogpult, args=(self,))
+        logWriteInput = threading.Thread(
+            target=self.loger.WritelogInput, args=(self,))
+        
+        logWriteOutput = threading.Thread(
+            target=self.loger.WritelogOutput, args=(self,))
+
 
         dispatch.start()
         receiver.start()
-        logthread.start()
+        logWriteInput.start()
+        logWriteOutput.start()
 
     def startservermain(self):
         # запуск бекенда сервера
@@ -298,6 +303,7 @@ class MainRovPult:
         self.port = literal_eval(self.config["Server"]["port"])
         self.log = literal_eval(self.config["Server"]["log"])
         self.logcmd = literal_eval(self.config["Server"]["logcmd"])
+        self.ratelog = literal_eval(self.config['Server']['ratelog'])
 
         self.name = literal_eval(self.config["RovSettings"]["name"])
         self.motorpowervalue = literal_eval(self.config["RovSettings"]["MotorPowerValue"])
@@ -316,6 +322,7 @@ class MainRovPult:
         print(self.name)
         print(self.motorpowervalue)
         print(self.joystickrate)
+        print(self.ratelog)
 
     # вывод типов данных атрибутов (отладка)
     def TypeVariablePrint(self):
@@ -325,24 +332,34 @@ class MainRovPult:
         print(type(self.logcmd))
         print(type(self.name))
         print(type(self.motorpowervalue))
-        print(type(self.joystickrate))     
+        print(type(self.joystickrate))
+        print(type(self.ratelog))     
         
-    
-    def InitServer(self):
+    # инициализация сервера 
+    def InitServer(self, *args):
         self.server = ServerMainPult(log=self.log, logcmd=self.logcmd,
                                     host=self.host, port=self.port,
                                     motorpowervalue=self.motorpowervalue,
                                     joystickrate=self.joystickrate)
+
         self.server.startservermain()
 
-    def InitApp(self):
+    # инициализация приложения 
+    def InitApp(self, *args):
         self.QuiROV = APPGui()
         self.QuiROV.main()
-
+    
+    # инициализация основного цикла 
     def MAIN(self):
-        self.InitServer()
-        self.InitApp()
+        self.mainserver = threading.Thread(
+            target=self.InitServer, args=(self,))
 
+        self.mainapp = threading.Thread(
+            target=self.InitApp, args=(self,))
+        
+        self.mainapp.start()
+        self.mainserver.start()
+        
 
 if __name__ == '__main__': # основной запуск 
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
