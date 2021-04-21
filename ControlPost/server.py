@@ -20,20 +20,22 @@ class ServerMainPult:
         # init variable
         self.HOST = host
         self.PORT = port
-        self.JOYSTICKRATE = joystickrate
+        self.JOYSTICKRATE = joystickrate 
         self.MotorPowerValue = motorpowervalue
-        self.massControl = {'time': 0,  # Текущее время
-                            'motorpowervalue': 1,  # мощность моторов
+        self.log = log 
+        self.logcmd = logcmd
+        self.DataInput = {}
+        self.startTime = str(datetime.now())
+
+        # словарик для отправки на аппарат
+        self.DataOutput = {'time': self.startTime,  # Текущее время
+                            'motorpowervalue': self.MotorPowerValue,  # мощность моторов
                             'x': 0, 'y': 0, 'z': 0,  # по идее мощность моторов
                             'led': False,  # управление светом
                             'manipul': 0,  # Управление манипулятором
                             'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
                             'servo-x2': 0, 'servo-y2': 0}  # управление подвесом обзорной камеры
-        # словарик для отправки на аппарат
 
-        self.log = log  # флаг логирования
-        self.logcmd = logcmd
-        self.datainput = {}  # получаемая информация
         self.startservermain()  # поднимаем сервер
 
     def settingServer(self):
@@ -57,11 +59,11 @@ class ServerMainPult:
         Прием информации с аппарата
         '''
         while True:
-            self.datainput = dict(literal_eval(
+            self.DataInput = dict(literal_eval(
                 self.user_socket.recv(1024).decode('utf-8')))
             # TODO тут что то делаем с полученной информацией ( выводим на экран и прочее )
             if self.logcmd:
-                print(self.datainput)
+                print(self.DataInput)
 
     def ControlProteus(self, *args):
         '''
@@ -69,14 +71,13 @@ class ServerMainPult:
         '''
         while True:
             timecontrol = str(datetime.now())
-            self.massControl["time"] = timecontrol
-            self.massControl["x"] = 0
-            self.massControl["y"] = 0
-            self.massControl["z"] = 0
+            self.DataOutput["time"] = timecontrol
+            self.DataOutput["x"] = 0
+            self.DataOutput["y"] = 0
+            self.DataOutput["z"] = 0
             # TODO сделать опрос джойстика или других управляющих приблуд
 
-            outmass = str(self.massControl).encode('utf-8')
-            self.user_socket.send(outmass)
+            self.user_socket.send(str(self.DataOutput).encode('utf-8'))
             sleep(self.JOYSTICKRATE)
 
     def startmultithreading(self):
@@ -107,36 +108,59 @@ class ServerMainPult:
 class LogerTXT:
     '''
     класс для логирования 
+    NameRov - названия аппарата 
+    time - время начала логирования 
+    ratelog - частота логирования 
     '''
-
-    def __init__(self, name):
-        self.RATELOG = 1
-        time = '-'.join('-'.join('-'.join(str(datetime.now()
-                                              ).split()).split('.')).split(':'))
-        self.name = "ControlPost/log/" + f'{name}-{time}.txt'
-        try:  # обработка ошибки с некорректным путем
-            self.file = open(self.name, "a+")
+    def __init__(self, NameRov, time, ratelog):
+        self.RATELOG = ratelog
+        time = '-'.join('-'.join('-'.join(time.split()).split('.')).split(':'))
+        self.namefileInput = "ControlPost/log/" + f'INPUT-{NameRov}-{time}.txt'
+        self.namefileOutput = "ControlPost/log/" + f'OUTPUT-{NameRov}-{time}.txt'
+        # обработка ошибки с некорректным путем
+        try: 
+            self.fileInput = open(self.namefileInput, "a+")
+            self.fileOutput = open(self.namefileOutput, 'a+')
         except:
-            self.file = open(f'{name}-{time}.txt')
-        # запись шапки
-        self.file.write(f"Name: {name}\n")
-        self.file.write(f'Time: {time}\n')
-        self.file.close()
+            self.fileInput = open(f'INPUT-{NameRov}-{time}.txt')
+            self.fileOutput = open(f'OUTPUT-{NameRov}-{time}.txt')
 
-    def writelog(self, info):  # запись одной строчки в лог
-        self.file.write(info + '\n')
+
+        # запись шапки
+        self.fileInput.write(f"NameRov: {NameRov}\n")
+        self.fileInput.write(f'Time: {time}\n')
+        self.fileOutput.write(f"NameRov: {NameRov}\n")
+        self.fileOutput.write(f'Time: {time}\n')
+        self.fileInput.close()
+        self.fileOutput.close()
 
     # паралельное логирование принятой информации раз в секунду
-    def writelogpult(self, pult: ServerMainPult):
+    def WritelogInput(self, pult: ServerMainPult):
         while True:
-            self.file = open(self.name, "a+")
-            inf = str(pult.datainput)
-            self.file.write(inf+'\n')
-            if pult.datainput['error'] != None:
-                errorinf = pult.datainput['error']
-                self.file.write('ERROR :' + errorinf + '\n')
+            self.fileInput = open(self.namefileInput, "a+")
+            inf = str(pult.DataInput)
+            self.fileInput.write(inf+'\n')
+
+            if pult.DataInput['error'] != None:
+                errorinf = pult.DataInput['error']
+                self.fileInput.write('ERROR :' + errorinf + '\n')
+                
             sleep(self.RATELOG)
-            self.file.close()
+            self.fileInput.close()
+
+    # паралельное логирование отсылаемой информации 
+    def WritelogOutput(self, pult: ServerMainPult):
+        while True:
+            self.fileOutput = open(self.namefileOutput, "a+")
+            inf = str(pult.DataOutput)
+            self.fileOutput.write(inf+'\n')
+
+            if pult.DataOutput['error'] != None:
+                errorinf = pult.DataOutput['error']
+                self.fileOutput.write('ERROR :' + errorinf + '\n')
+
+            sleep(self.RATELOG)
+            self.fileOutput.close()
 
     def VisualizationLog(self):
         # TODO визуализация логов
@@ -221,12 +245,12 @@ class Ui_MainWindow(object):  # класс описывающий внешний
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
+    # функция проверки прогресс баров 
     def checkprogress(self, *args):
         speed = 0.01
         for i in range(101):
             sleep(speed)
             self.progressBar.setValue(i)
-            self.dial.setValue(i * 10)
 
         for i in range(101):
             sleep(speed)
@@ -257,15 +281,17 @@ class APPGui():  # класс описывающий работу приложе
         self.ui.setupUi(self.MainWindow)
 
     def main(self):
+        # проверка прогресс баров в отдельном потоке 
         check = threading.Thread(
             target=self.ui.checkprogress, args=(self.ui,))
         check.start()
-
-        self.MainWindow.show()
+        # показ окна и обработка закрытия 
+        self.MainWindow.show() 
         sys.exit(self.app.exec_())
 
 class MainRovPult:
     def __init__(self):
+        # считывание конфиг файлов 
         self.config = ConfigParser()
         self.config.read("ControlPost/settings.ini")
         self.host = literal_eval(self.config["Server"]["host"]) 
@@ -281,6 +307,7 @@ class MainRovPult:
         self.I = literal_eval(self.config["RovSettings"]["I"])
         self.D = literal_eval(self.config["RovSettings"]["D"])
 
+    # вывод показаний конфигов 
     def variablePrint(self):
         print(self.host)
         print(self.port)
@@ -290,6 +317,7 @@ class MainRovPult:
         print(self.motorpowervalue)
         print(self.joystickrate)
 
+    # вывод типов данных атрибутов (отладка)
     def TypeVariablePrint(self):
         print(type(self.host))
         print(type(self.port))
