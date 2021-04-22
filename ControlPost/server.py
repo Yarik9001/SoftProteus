@@ -353,15 +353,15 @@ class MainRovPult:
     
     # инициализация основного цикла 
     def MAIN(self):
-        self.mainserver = threading.Thread(
-            target=self.InitServer, args=(self,))
+        # self.mainserver = threading.Thread(
+        #     target=self.InitServer, args=(self,))
 
-        self.mainapp = threading.Thread(
-            target=self.InitApp, args=(self,))
+        # self.mainapp = threading.Thread(
+        #     target=self.InitApp, args=(self,))
         
         # self.mainapp.start()
-        self.mainserver.start()
-        
+        # # self.mainserver.start()
+        self.InitApp()
 
 if __name__ == '__main__': # основной запуск 
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера

@@ -51,4 +51,5 @@ class ServerMainPult:
 
 
 if __name__ == '__main__':
-    Proteus = ServerMainPult()
+    test = threading.Thread(target= ServerMainPult())
+    test.start()
