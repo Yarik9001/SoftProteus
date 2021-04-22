@@ -84,7 +84,7 @@ class ServerMainPult:
 
     def startmultithreading(self):
         # инициализация логирования
-        self.loger = LogerTXT('Prteus0')
+        self.loger = LogerTXT('Prteus0',self.startTime, 0.5)
 
         # инициализация потоков приема и передачи
         receiver = threading.Thread(
@@ -289,9 +289,9 @@ class APPGui():  # класс описывающий работу приложе
 
     def main(self):
         # проверка прогресс баров в отдельном потоке 
-        check = threading.Thread(
-            target=self.ui.checkprogress, args=(self.ui,))
-        check.start()
+        # check = threading.Thread(
+        #     target=self.ui.checkprogress, args=(self.ui,))
+        # check.start()
         # показ окна и обработка закрытия 
         self.MainWindow.show() 
         sys.exit(self.app.exec_())
@@ -353,14 +353,14 @@ class MainRovPult:
     
     # инициализация основного цикла 
     def MAIN(self):
-        # self.mainserver = threading.Thread(
-        #     target=self.InitServer, args=(self,))
+        self.mainserver = threading.Thread(
+            target=self.InitServer, args=(self,))
 
         # self.mainapp = threading.Thread(
         #     target=self.InitApp, args=(self,))
         
         # self.mainapp.start()
-        # # self.mainserver.start()
+        self.mainserver.start()
         self.InitApp()
 
 if __name__ == '__main__': # основной запуск 
