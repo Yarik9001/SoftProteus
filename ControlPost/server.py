@@ -11,6 +11,8 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 
 
+
+
 class ServerMainPult:
     '''
     Класс описывающий систему бекенд пульта 
@@ -357,7 +359,7 @@ class MainRovPult:
         self.mainapp = threading.Thread(
             target=self.InitApp, args=(self,))
         
-        self.mainapp.start()
+        # self.mainapp.start()
         self.mainserver.start()
         
 
