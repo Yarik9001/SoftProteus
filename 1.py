@@ -92,12 +92,17 @@ if __name__ == '__main__':
 # print('hello world')
 
 # получение ip adress
-# import socket
-# print(socket.gethostbyname(socket.getfqdn()))
-from configparser import  ConfigParser
+# # import socket
+# # print(socket.gethostbyname(socket.getfqdn()))
+# from configparser import  ConfigParser
 
-config = ConfigParser()  # создаём объекта парсера
-config.read("settings.ini")  # читаем конфиг
+# config = ConfigParser()  # создаём объекта парсера
+# config.read("settings.ini")  # читаем конфиг
 
-print(config["Twitter"]["username"])  # обращаемся как к обычному словарю!
-# 'johndoe'
+# print(config["Twitter"]["username"])  # обращаемся как к обычному словарю!
+# # 'johndoe'
+
+from screeninfo import get_monitors
+for m in get_monitors():
+    print(m.width)
+    print(m.height)
