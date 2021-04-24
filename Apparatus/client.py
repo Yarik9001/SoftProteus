@@ -22,13 +22,8 @@ class ROVProteus:
     def settingServer(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
         self.client.connect((self.HOST, self.PORT))  # подключение адресс  порт
-    
-    def hello(self):
         # обмен приветсвиями
-        self.client.send('Connect-Proteus0-25'.encode("utf-8"))
-        data = self.client.recv(256)
-        if self.logcmd:
-            print(data.decode("utf-8"))
+
     
     def startmultithreading(self):
         # инициализауия потоков приема и передачи

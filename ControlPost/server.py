@@ -4,8 +4,10 @@ from datetime import datetime  # получение  времени
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from configparser import  ConfigParser # мудуль для работы с конфиг файлами 
+
 # модуль для работы с джойстиком ps2
 from pyPS4Controller.controller import Controller
+
 # часть связанная с графическим интерфейсом
 import sys
 from PyQt5 import QtCore, QtWidgets
@@ -15,7 +17,14 @@ from PyQt5 import QtCore, QtWidgets
 
 class ServerMainPult:
     '''
-    Класс описывающий систему бекенд пульта 
+    Класс описывающий систему бекенд пульта
+    log - флаг логирования 
+    log cmd - флаг вывода логов с cmd 
+    host - хост на котором будет крутиться сервер 
+    port- порт для подключения 
+    motorpowervalue=500 - программное ограничение мощности моторов 
+    joystickrate - частота опроса джойстика 
+
     '''
 
     def __init__(self, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01):
@@ -45,70 +54,48 @@ class ServerMainPult:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
         self.server.bind((self.HOST, self.PORT))
         self.server.listen()
-        if self.logcmd:
-            print("Server is start and listening")
-
-    def hello(self):
-        # обмен преветсвиями
         self.user_socket, self.address = self.server.accept()
-        data = self.user_socket.recv(256)
-        self.user_socket.send('Connect-Pult1-25'.encode("utf-8"))
-        if self.logcmd:
-            print(data.decode("utf-8"))
+        return "ROV-Connected"
+            
 
-    def ReceiverProteus(self, *args):
+    def ReceiverProteus(self):
         '''
-        Прием информации с аппарата
+        Прием информации с аппарата запись в атрибуты класса 
+        (работает в фотонов режиме в отдельном потоке)
         '''
         while True:
             self.DataInput = dict(literal_eval(
                 self.user_socket.recv(1024).decode('utf-8')))
-            # TODO тут что то делаем с полученной информацией ( выводим на экран и прочее )
             if self.logcmd:
                 print(self.DataInput)
 
-    def ControlProteus(self, *args):
+
+    def ControlProteus(self):
         '''
-        Отправка управляющей информации на аппарат 
+        Отправка управляющей информации на аппарат через равные промежутки времени.
+        Значения для отправки беруться из атрибутов класса, а изменяются в паралельных потоках.
+        (работает в фоновом режиме в отдельном потоке) 
         '''
         while True:
             timecontrol = str(datetime.now())
             self.DataOutput["time"] = timecontrol
-            self.DataOutput["x"] = 0
-            self.DataOutput["y"] = 0
-            self.DataOutput["z"] = 0
-            # TODO сделать опрос джойстика или других управляющих приблуд
-
             self.user_socket.send(str(self.DataOutput).encode('utf-8'))
             sleep(self.JOYSTICKRATE)
 
     def startmultithreading(self):
-        # инициализация логирования
-        self.loger = LogerTXT('Prteus0',self.startTime, 0.5)
-
         # инициализация потоков приема и передачи
         receiver = threading.Thread(
-            target=self.ReceiverProteus, args=(self,))
-
+            target=self.ReceiverProteus, args=(self))
+            
         dispatch = threading.Thread(
-            target=self.ControlProteus, args=(self,))
-
-        logWriteInput = threading.Thread(
-            target=self.loger.WritelogInput, args=(self,))
-        
-        logWriteOutput = threading.Thread(
-            target=self.loger.WritelogOutput, args=(self,))
-
+            target=self.ControlProteus, args=(self))
 
         dispatch.start()
         receiver.start()
-        logWriteInput.start()
-        logWriteOutput.start()
-
+# Для отладки 
     def startservermain(self):
-        # запуск бекенда сервера
+        
         self.settingServer()
-        self.hello()
         self.startmultithreading()
 
 
