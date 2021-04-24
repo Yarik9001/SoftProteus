@@ -47,7 +47,7 @@ class ServerMainPult:
                             'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
                             'servo-x2': 0, 'servo-y2': 0}  # управление подвесом обзорной камеры
 
-        self.startservermain()  # поднимаем сервер
+        # self.startservermain()  # поднимаем сервер
 
     def settingServer(self):
         # настройка сервера 
@@ -58,7 +58,7 @@ class ServerMainPult:
         return "ROV-Connected"
             
 
-    def ReceiverProteus(self):
+    def ReceiverProteus(self,*args):
         '''
         Прием информации с аппарата запись в атрибуты класса 
         (работает в фотонов режиме в отдельном потоке)
@@ -70,7 +70,7 @@ class ServerMainPult:
                 print(self.DataInput)
 
 
-    def ControlProteus(self):
+    def ControlProteus(self,*args):
         '''
         Отправка управляющей информации на аппарат через равные промежутки времени.
         Значения для отправки беруться из атрибутов класса, а изменяются в паралельных потоках.
@@ -85,14 +85,14 @@ class ServerMainPult:
     def startmultithreading(self):
         # инициализация потоков приема и передачи
         receiver = threading.Thread(
-            target=self.ReceiverProteus, args=(self))
+            target=self.ReceiverProteus, args=(self,))
             
         dispatch = threading.Thread(
-            target=self.ControlProteus, args=(self))
+            target=self.ControlProteus, args=(self,))
 
         dispatch.start()
         receiver.start()
-# Для отладки 
+    # Для отладки 
     def startservermain(self):
         
         self.settingServer()
@@ -304,37 +304,32 @@ class MainRovPult:
 
     # вывод показаний конфигов 
     def variablePrint(self):
-        print(self.host)
-        print(self.port)
-        print(self.log)
-        print(self.logcmd)
-        print(self.name)
-        print(self.motorpowervalue)
-        print(self.joystickrate)
-        print(self.ratelog)
+        print('host-', self.host)
+        print("port-", self.port)
+        print("log-", self.log)
+        print("logcmd-", self.logcmd)
+        print("Name-", self.name)
+        print("MotorValue-", self.motorpowervalue)
+        print("JoystikRate-", self.joystickrate)
+        print("RateLog-",self.ratelog)
 
-    # вывод типов данных атрибутов (отладка)
-    def TypeVariablePrint(self):
-        print(type(self.host))
-        print(type(self.port))
-        print(type(self.log))
-        print(type(self.logcmd))
-        print(type(self.name))
-        print(type(self.motorpowervalue))
-        print(type(self.joystickrate))
-        print(type(self.ratelog))     
+   
         
     # инициализация сервера 
-    def InitServer(self, *args):
-        self.server = ServerMainPult(log=self.log, logcmd=self.logcmd,
-                                    host=self.host, port=self.port,
-                                    motorpowervalue=self.motorpowervalue,
-                                    joystickrate=self.joystickrate)
+    def InitServer(self,*args):
+        self.server = ServerMainPult(
+                                log=self.log, 
+                                logcmd=self.logcmd,
+                                host=self.host,
+                                port=self.port,
+                                motorpowervalue=self.motorpowervalue,
+                                joystickrate=self.joystickrate
+                                )
 
         self.server.startservermain()
 
     # инициализация приложения 
-    def InitApp(self, *args):
+    def InitApp(self,):
         self.QuiROV = APPGui()
         self.QuiROV.main()
     
@@ -348,7 +343,7 @@ class MainRovPult:
         
         # self.mainapp.start()
         self.mainserver.start()
-        self.InitApp()
+        # self.InitApp()
 
 if __name__ == '__main__': # основной запуск 
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера

@@ -39,7 +39,6 @@ class ROVProteus:
     def startclientmain(self):
         # запуск бекенда сервера
         self.settingServer()
-        self.hello()
         self.startmultithreading()
 
     def CheckSensor(self):
