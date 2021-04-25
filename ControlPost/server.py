@@ -167,13 +167,13 @@ class ServerMainPult:
         
             
 
-    def ReceiverProteus(self,*args):
+    def ReceiverProteus(self, *args):
         '''
         Прием информации с аппарата запись в атрибуты класса 
         (работает в фотонов режиме в отдельном потоке)
         '''
         while self.checkConnect:
-            data = self.user_socket.recv(1024)
+            data = self.user_socket.recv(176)
             if len(data) == 0:
                 self.server.close()
                 self.checkConnect = False
@@ -181,7 +181,7 @@ class ServerMainPult:
                     print('ROV-disconnection', self.user_socket)
                 break
 
-            self.DataInput = dict(literal_eval(data.decode('utf-8')))
+            self.DataInput = dict(literal_eval(str(data.decode('utf-8'))))
             if self.logcmd:
                 print("DataInput-", self.DataInput)
 

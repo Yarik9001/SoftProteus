@@ -67,7 +67,7 @@ class ROVProteus:
         Прием информации 
         '''
         while True:
-            data = self.client.recv(1024).decode('utf-8')
+            data = self.client.recv(512).decode('utf-8')
             # TODO считаем и отсылаем управляющие сигналы на моторы и прочую полезную нагрузку
             if self.logcmd:
                 print(data)
