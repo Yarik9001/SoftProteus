@@ -102,7 +102,101 @@ if __name__ == '__main__':
 # print(config["Twitter"]["username"])  # обращаемся как к обычному словарю!
 # # 'johndoe'
 
-from screeninfo import get_monitors
-for m in get_monitors():
-    print(m.width)
-    print(m.height)
+# from screeninfo import get_monitors
+# for m in get_monitors():
+#     print(m.width)
+#     print(m.height)
+
+# import keyboard
+
+# a = None
+
+# def print_pressed_keys(e):
+#     global a
+#     if e != a:
+#         a = e
+#         print(e.event_type, e.name)
+
+# def up(key):
+#     print('up')
+    
+# def down(key):
+#     print('down')
+
+# keyboard.on_press_key('w', up ,suppress=False)
+# keyboard.on_release_key('w', down, suppress=False)
+# keyboard.wait()
+'''
+вперед - down w
+отпустить - up w
+
+назад - down s
+отмена -up s
+
+вправо - down a
+отмена - up a
+
+влево - down d
+отмена - up d
+
+вверх - down  up
+отмена - up up
+
+вниз - down down 
+отмена - up down 
+'''
+from keyboard import hook, wait, on_press_key, on_release_key
+
+class MyControllerKeyboard:
+    def __init__(self):
+        on_press_key('w', self.forward, suppress= False)
+        on_release_key('w',self.forward_release, suppress=False)
+        on_press_key('s', self.back, suppress=False)
+        on_release_key('s', self.down_relaese, suppress=False)
+        on_press_key('a', self.left, suppress=False)
+        on_release_key('a', self.left_relaese, suppress=False)
+        on_press_key('d', self.right, suppress=False)
+        on_release_key('d', self.right_relaese, suppress=False)
+        on_press_key('up', self.up, suppress=False)
+        on_release_key('up', self.up_relaese, suppress=False)
+        on_press_key('down', self.down, suppress=False)
+        on_release_key('down', self.down_relaese, suppress=False)
+        wait()
+        
+    def forward(self, key):
+        print('forward')
+        
+    def forward_release(self, key):
+        print('forward-stop')
+        
+    def back(self, key):
+        print('back')
+        
+    def back_ralease(self, key):
+        print('back-relaese')
+    
+    def left(self, key):
+        print('left')
+        
+    def left_relaese(self, key):
+        print('left_relaese')
+        
+    def right(self, key):
+        print('right')
+        
+    def right_relaese(self, key):
+        print('right-relaese')
+        
+    def up(self, key):
+        print('up')
+    
+    def up_relaese(self, key):
+        print('up-relaese')
+        
+    def down(self, key):
+        print('down')
+        
+    def down_relaese(self, key):
+        print('down-relaese')
+        
+a = MyControllerKeyboard()
