@@ -78,6 +78,7 @@ class MainRovPult:
             if self.logOutput:
                 logout = threading.Thread(target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
+            
 
 
     # инициализация приложения 
@@ -160,9 +161,10 @@ class ServerMainPult:
         self.server.bind((self.HOST, self.PORT))
         self.server.listen()
         self.user_socket, self.address = self.server.accept()
+        self.checkConnect = True
         if self.logcmd:
             print("ROV-Connected", self.user_socket)
-        self.checkConnect = True
+        
             
 
     def ReceiverProteus(self,*args):
@@ -240,8 +242,8 @@ class LogerTXT:
             self.fileInput = open(self.namefileInput, "a+")
             self.fileOutput = open(self.namefileOutput, 'a+')
         except:
-            self.fileInput = open(f'INPUT-{NameRov}-{time}.txt')
-            self.fileOutput = open(f'OUTPUT-{NameRov}-{time}.txt')
+            self.fileInput = open(f'INPUT-{NameRov}-{time}.txt', "a+")
+            self.fileOutput = open(f'OUTPUT-{NameRov}-{time}.txt', "a+")
 
         # запись шапки
         self.fileInput.write(f"NameRov: {NameRov}\n")
@@ -255,28 +257,30 @@ class LogerTXT:
     def WritelogInput(self,*args): # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
         pult = self.rov.server
         print('logInput')
-        while pult.checkConnect:
-            self.fileInput = open(self.namefileInput, "a+")
-            inf = str(pult.DataInput)
-            self.fileInput.write(inf+'\n')
-            # Запись ошибок 
-            if pult.DataInput['error'] != None:
-                errorinf = pult.DataInput['error']
-                self.fileInput.write('ERROR :' + errorinf + '\n')
+        while True:
+            if pult.checkConnect:
+                self.fileInput = open(self.namefileInput, "a+")
+                inf = str(pult.DataInput)
+                self.fileInput.write(inf+'\n')
+                # Запись ошибок 
+                if pult.DataInput['error'] != None:
+                    errorinf = pult.DataInput['error']
+                    self.fileInput.write('ERROR :' + errorinf + '\n')
                 
-            sleep(self.ratelog)
-            self.fileInput.close()
+                sleep(self.ratelog)
+                self.fileInput.close()
 
     # паралельное логирование отсылаемой информации 
     def WritelogOutput(self, *args):
         pult = self.rov.server
         print('logWrite')
-        while pult.checkConnect:
-            self.fileOutput = open(self.namefileOutput, "a+")
-            inf = str(pult.DataOutput)
-            self.fileOutput.write(inf+'\n')
-            self.fileOutput.close()
-            sleep(self.ratelog)
+        while True:
+            if pult.checkConnect:
+                self.fileOutput = open(self.namefileOutput, "a+")
+                inf = str(pult.DataOutput)
+                self.fileOutput.write(inf+'\n')
+                self.fileOutput.close()
+                sleep(self.ratelog)
             
 
 
