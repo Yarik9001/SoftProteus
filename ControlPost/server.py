@@ -14,8 +14,10 @@ from PyQt5 import QtCore, QtWidgets
 
 
 class MainRovPult:
+
     def __init__(self):
         self.startTime = str(datetime.now())
+        
         # считывание конфиг файлов 
         self.config = ConfigParser()
         self.config.read("ControlPost/settings.ini")
@@ -65,15 +67,17 @@ class MainRovPult:
                                 )
 
         self.server.startservermain()
-        
+
     # инициализация логирования 
     def InitLogger(self,*args):
         if self.log and (self.logOutput or self.logInput):
-            self.logger = LogerTXT(self.server)
+            self.logger = LogerTXT(self)
             if self.logInput:
-                self.logger.WritelogInput()
+                loginp =threading.Thread(target=self.logger.WritelogInput, args=(self.logger,))
+                loginp.start()
             if self.logOutput:
-                self.logger.WritelogOutput()
+                logout = threading.Thread(target=self.logger.WritelogOutput, args=(self.logger,))
+                logout.start()
 
 
     # инициализация приложения 
@@ -93,9 +97,13 @@ class MainRovPult:
         self.mainJoistik = threading.Thread(
             target=self.InitJoystick, args=(self,))
 
+        self.mainLogger = threading.Thread(
+            target=self.InitLogger, args=(self,))
+
 
         self.mainserver.start()
         self.mainJoistik.start()
+        self.mainLogger.start()
 
         # self.InitApp()
 
@@ -120,8 +128,9 @@ class ServerMainPult:
         self.MotorPowerValue = motorpowervalue
         self.log = log 
         self.logcmd = logcmd
-        self.DataInput = {}
         self.startTime = startTime
+        self.checkConnect = False
+    
 
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
@@ -130,7 +139,18 @@ class ServerMainPult:
                             'led': False,  # управление светом
                             'manipul': 0,  # Управление манипулятором
                             'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
-                            'servo-x2': 0, 'servo-y2': 0}  # управление подвесом обзорной камеры
+                            'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
+                            }  
+        self.DataInput = {
+                        'time': None,
+                        'dept': 0,
+                        'm1': 0,'m2': 0, 'm3': 0,
+                        'm4': 0, 'm5': 0, 'm6': 0,
+                        'Volt': 0,
+                        'error': None,
+                        'danger-error':False,
+                        'x':0, 'y':0,'z':0
+                        }
 
         # self.startservermain()  # поднимаем сервер
 
@@ -140,7 +160,9 @@ class ServerMainPult:
         self.server.bind((self.HOST, self.PORT))
         self.server.listen()
         self.user_socket, self.address = self.server.accept()
-        return "ROV-Connected"
+        if self.logcmd:
+            print("ROV-Connected", self.user_socket)
+        self.checkConnect = True
             
 
     def ReceiverProteus(self,*args):
@@ -148,11 +170,18 @@ class ServerMainPult:
         Прием информации с аппарата запись в атрибуты класса 
         (работает в фотонов режиме в отдельном потоке)
         '''
-        while True:
-            self.DataInput = dict(literal_eval(
-                self.user_socket.recv(1024).decode('utf-8')))
+        while self.checkConnect:
+            data = self.user_socket.recv(1024)
+            if len(data) == 0:
+                self.server.close()
+                self.checkConnect = False
+                if self.logcmd:
+                    print('ROV-disconnection', self.user_socket)
+                break
+
+            self.DataInput = dict(literal_eval(data.decode('utf-8')))
             if self.logcmd:
-                print(self.DataInput)
+                print("DataInput-", self.DataInput)
 
 
     def ControlProteus(self,*args):
@@ -161,10 +190,12 @@ class ServerMainPult:
         Значения для отправки беруться из атрибутов класса, а изменяются в паралельных потоках.
         (работает в фоновом режиме в отдельном потоке) 
         '''
-        while True:
+        while self.checkConnect:
             timecontrol = str(datetime.now())
             self.DataOutput["time"] = timecontrol
             self.user_socket.send(str(self.DataOutput).encode('utf-8'))
+            if self.logcmd:
+                print('DataOutput-',self.DataOutput)
             sleep(self.JOYSTICKRATE)
 
     def startmultithreading(self):
@@ -177,9 +208,9 @@ class ServerMainPult:
 
         dispatch.start()
         receiver.start()
+        
     # Для отладки 
     def startservermain(self):
-        
         self.settingServer()
         self.startmultithreading()
 
@@ -196,7 +227,7 @@ class LogerTXT:
     '''
     def __init__(self, rov: MainRovPult):
         self.rov = rov
-        self.RATELOG = self.rov.ratelog
+        self.ratelog = self.rov.ratelog
         time = self.rov.startTime
         NameRov = self.rov.name
         time = '-'.join('-'.join('-'.join(time.split()).split('.')).split(':'))
@@ -221,9 +252,10 @@ class LogerTXT:
         self.fileOutput.close()
 
     # логирование принятой информации раз в секунду
-    def WritelogInput(self): # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
+    def WritelogInput(self,*args): # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
         pult = self.rov.server
-        while True:
+        print('logInput')
+        while pult.checkConnect:
             self.fileInput = open(self.namefileInput, "a+")
             inf = str(pult.DataInput)
             self.fileInput.write(inf+'\n')
@@ -232,23 +264,20 @@ class LogerTXT:
                 errorinf = pult.DataInput['error']
                 self.fileInput.write('ERROR :' + errorinf + '\n')
                 
-            sleep(self.RATELOG)
+            sleep(self.ratelog)
             self.fileInput.close()
 
     # паралельное логирование отсылаемой информации 
-    def WritelogOutput(self):
+    def WritelogOutput(self, *args):
         pult = self.rov.server
-        while True:
+        print('logWrite')
+        while pult.checkConnect:
             self.fileOutput = open(self.namefileOutput, "a+")
             inf = str(pult.DataOutput)
             self.fileOutput.write(inf+'\n')
-            # Запись ошибок 
-            if pult.DataOutput['error'] != None:
-                errorinf = pult.DataOutput['error']
-                self.fileOutput.write('ERROR :' + errorinf + '\n')
-
-            sleep(self.RATELOG)
             self.fileOutput.close()
+            sleep(self.ratelog)
+            
 
 
 
