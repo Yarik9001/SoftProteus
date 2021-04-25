@@ -13,6 +13,91 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 
 
+class MainRovPult:
+    def __init__(self):
+        self.startTime = str(datetime.now())
+        # считывание конфиг файлов 
+        self.config = ConfigParser()
+        self.config.read("ControlPost/settings.ini")
+        self.host = literal_eval(self.config["Server"]["host"]) 
+        self.port = literal_eval(self.config["Server"]["port"])
+        self.log = literal_eval(self.config["Server"]["log"])
+        self.logcmd = literal_eval(self.config["Server"]["logcmd"])
+        self.ratelog = literal_eval(self.config['Server']['ratelog'])
+        self.logOutput = literal_eval(self.config['Server']['logOutput'])
+        self.logInput = literal_eval(self.config['Server']['logInput'])
+
+        self.name = literal_eval(self.config["RovSettings"]["name"])
+        self.motorpowervalue = literal_eval(self.config["RovSettings"]["MotorPowerValue"])
+        self.joystickrate = literal_eval(self.config["RovSettings"]["joystickrate"])
+
+        self.P = literal_eval(self.config["RovSettings"]["P"])
+        self.I = literal_eval(self.config["RovSettings"]["I"])
+        self.D = literal_eval(self.config["RovSettings"]["D"])
+
+        if self.logcmd:
+            self.variablePrint()
+
+    # вывод показаний конфигов 
+    def variablePrint(self):
+        print('Start: ', self.startTime)
+        print('host-', self.host)
+        print("port-", self.port)
+        print("log-", self.log)
+        print("logcmd-", self.logcmd)
+        print("Name-", self.name)
+        print("MotorValue-", self.motorpowervalue)
+        print("JoystikRate-", self.joystickrate)
+        print("RateLog-", self.ratelog)
+        print('logInput-', self.logInput)
+        print('logOutput-', self.logOutput)
+
+    # инициализация сервера 
+    def InitServer(self,*args):
+        self.server = ServerMainPult(
+                                log=self.log, 
+                                logcmd=self.logcmd,
+                                host=self.host,
+                                port=self.port,
+                                motorpowervalue=self.motorpowervalue,
+                                joystickrate=self.joystickrate,
+                                startTime=self.startTime
+                                )
+
+        self.server.startservermain()
+        
+    # инициализация логирования 
+    def InitLogger(self,*args):
+        if self.log and (self.logOutput or self.logInput):
+            self.logger = LogerTXT(self.server)
+            if self.logInput:
+                self.logger.WritelogInput()
+            if self.logOutput:
+                self.logger.WritelogOutput()
+
+
+    # инициализация приложения 
+    def InitApp(self, *args):
+        self.QuiROV = APPGui()
+        self.QuiROV.main()
+
+    def InitJoystick(self, *args):
+        # TODO Сделать опрос джойстика и инициализацию обьекта класса джойстик 
+        pass
+    
+    # инициализация основного цикла 
+    def MAIN(self):
+        self.mainserver = threading.Thread(
+            target=self.InitServer, args=(self,))
+
+        self.mainJoistik = threading.Thread(
+            target=self.InitJoystick, args=(self,))
+
+
+        self.mainserver.start()
+        self.mainJoistik.start()
+
+        # self.InitApp()
 
 
 class ServerMainPult:
@@ -27,7 +112,7 @@ class ServerMainPult:
 
     '''
 
-    def __init__(self, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01):
+    def __init__(self,name =None, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01, startTime=None):
         # инициализация атрибутов 
         self.HOST = host
         self.PORT = port
@@ -36,7 +121,7 @@ class ServerMainPult:
         self.log = log 
         self.logcmd = logcmd
         self.DataInput = {}
-        self.startTime = str(datetime.now())
+        self.startTime = startTime
 
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
@@ -104,13 +189,21 @@ class LogerTXT:
     класс для логирования 
     NameRov - названия аппарата 
     time - время начала логирования 
-    ratelog - частота логирования 
+    ratelog - частота логирования
+
+    Основной принцип заключается в том что мы вытягиваем атрибуты 
+    класса сервера и переодически из логируем
     '''
-    def __init__(self, NameRov, time, ratelog):
-        self.RATELOG = ratelog
+    def __init__(self, rov: MainRovPult):
+        self.rov = rov
+        self.RATELOG = self.rov.ratelog
+        time = self.rov.startTime
+        NameRov = self.rov.name
         time = '-'.join('-'.join('-'.join(time.split()).split('.')).split(':'))
+
         self.namefileInput = "ControlPost/log/" + f'INPUT-{NameRov}-{time}.txt'
         self.namefileOutput = "ControlPost/log/" + f'OUTPUT-{NameRov}-{time}.txt'
+
         # обработка ошибки с некорректным путем
         try: 
             self.fileInput = open(self.namefileInput, "a+")
@@ -118,7 +211,6 @@ class LogerTXT:
         except:
             self.fileInput = open(f'INPUT-{NameRov}-{time}.txt')
             self.fileOutput = open(f'OUTPUT-{NameRov}-{time}.txt')
-
 
         # запись шапки
         self.fileInput.write(f"NameRov: {NameRov}\n")
@@ -128,13 +220,14 @@ class LogerTXT:
         self.fileInput.close()
         self.fileOutput.close()
 
-    # паралельное логирование принятой информации раз в секунду
-    def WritelogInput(self, pult: ServerMainPult):
+    # логирование принятой информации раз в секунду
+    def WritelogInput(self): # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
+        pult = self.rov.server
         while True:
             self.fileInput = open(self.namefileInput, "a+")
             inf = str(pult.DataInput)
             self.fileInput.write(inf+'\n')
-
+            # Запись ошибок 
             if pult.DataInput['error'] != None:
                 errorinf = pult.DataInput['error']
                 self.fileInput.write('ERROR :' + errorinf + '\n')
@@ -143,12 +236,13 @@ class LogerTXT:
             self.fileInput.close()
 
     # паралельное логирование отсылаемой информации 
-    def WritelogOutput(self, pult: ServerMainPult):
+    def WritelogOutput(self):
+        pult = self.rov.server
         while True:
             self.fileOutput = open(self.namefileOutput, "a+")
             inf = str(pult.DataOutput)
             self.fileOutput.write(inf+'\n')
-
+            # Запись ошибок 
             if pult.DataOutput['error'] != None:
                 errorinf = pult.DataOutput['error']
                 self.fileOutput.write('ERROR :' + errorinf + '\n')
@@ -156,9 +250,6 @@ class LogerTXT:
             sleep(self.RATELOG)
             self.fileOutput.close()
 
-    def VisualizationLog(self):
-        # TODO визуализация логов
-        pass
 
 
 class MyController(Controller):
@@ -283,67 +374,7 @@ class APPGui():  # класс описывающий работу приложе
         self.MainWindow.show() 
         sys.exit(self.app.exec_())
 
-class MainRovPult:
-    def __init__(self):
-        # считывание конфиг файлов 
-        self.config = ConfigParser()
-        self.config.read("ControlPost/settings.ini")
-        self.host = literal_eval(self.config["Server"]["host"]) 
-        self.port = literal_eval(self.config["Server"]["port"])
-        self.log = literal_eval(self.config["Server"]["log"])
-        self.logcmd = literal_eval(self.config["Server"]["logcmd"])
-        self.ratelog = literal_eval(self.config['Server']['ratelog'])
 
-        self.name = literal_eval(self.config["RovSettings"]["name"])
-        self.motorpowervalue = literal_eval(self.config["RovSettings"]["MotorPowerValue"])
-        self.joystickrate = literal_eval(self.config["RovSettings"]["joystickrate"])
-
-        self.P = literal_eval(self.config["RovSettings"]["P"])
-        self.I = literal_eval(self.config["RovSettings"]["I"])
-        self.D = literal_eval(self.config["RovSettings"]["D"])
-
-    # вывод показаний конфигов 
-    def variablePrint(self):
-        print('host-', self.host)
-        print("port-", self.port)
-        print("log-", self.log)
-        print("logcmd-", self.logcmd)
-        print("Name-", self.name)
-        print("MotorValue-", self.motorpowervalue)
-        print("JoystikRate-", self.joystickrate)
-        print("RateLog-",self.ratelog)
-
-   
-        
-    # инициализация сервера 
-    def InitServer(self,*args):
-        self.server = ServerMainPult(
-                                log=self.log, 
-                                logcmd=self.logcmd,
-                                host=self.host,
-                                port=self.port,
-                                motorpowervalue=self.motorpowervalue,
-                                joystickrate=self.joystickrate
-                                )
-
-        self.server.startservermain()
-
-    # инициализация приложения 
-    def InitApp(self,):
-        self.QuiROV = APPGui()
-        self.QuiROV.main()
-    
-    # инициализация основного цикла 
-    def MAIN(self):
-        self.mainserver = threading.Thread(
-            target=self.InitServer, args=(self,))
-
-        # self.mainapp = threading.Thread(
-        #     target=self.InitApp, args=(self,))
-        
-        # self.mainapp.start()
-        self.mainserver.start()
-        # self.InitApp()
 
 if __name__ == '__main__': # основной запуск 
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
