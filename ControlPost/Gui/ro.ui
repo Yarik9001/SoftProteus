@@ -9,9 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1366</width>
+    <height>768</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>12</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>ROV-0.1</string>
@@ -26,10 +31,10 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>354</x>
-      <y>520</y>
+      <x>620</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -42,17 +47,17 @@
    <widget class="QProgressBar" name="progressBar_2">
     <property name="geometry">
      <rect>
-      <x>364</x>
-      <y>520</y>
+      <x>630</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -70,10 +75,10 @@
    <widget class="QProgressBar" name="progressBar_3">
     <property name="geometry">
      <rect>
-      <x>384</x>
-      <y>520</y>
+      <x>650</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -86,14 +91,14 @@
    <widget class="QProgressBar" name="progressBar_4">
     <property name="geometry">
      <rect>
-      <x>394</x>
-      <y>520</y>
+      <x>660</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -105,10 +110,10 @@
    <widget class="QProgressBar" name="progressBar_5">
     <property name="geometry">
      <rect>
-      <x>414</x>
-      <y>520</y>
+      <x>680</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -121,14 +126,14 @@
    <widget class="QProgressBar" name="progressBar_6">
     <property name="geometry">
      <rect>
-      <x>424</x>
-      <y>520</y>
+      <x>690</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -140,10 +145,10 @@
    <widget class="QProgressBar" name="progressBar_7">
     <property name="geometry">
      <rect>
-      <x>444</x>
-      <y>520</y>
+      <x>710</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -156,14 +161,15 @@
    <widget class="QProgressBar" name="progressBar_8">
     <property name="geometry">
      <rect>
-      <x>454</x>
-      <y>520</y>
+      <x>720</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 0);
+color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -175,10 +181,10 @@
    <widget class="QProgressBar" name="progressBar_9">
     <property name="geometry">
      <rect>
-      <x>474</x>
-      <y>520</y>
+      <x>740</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -191,14 +197,14 @@
    <widget class="QProgressBar" name="progressBar_10">
     <property name="geometry">
      <rect>
-      <x>484</x>
-      <y>520</y>
+      <x>750</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -210,10 +216,10 @@
    <widget class="QProgressBar" name="progressBar_11">
     <property name="geometry">
      <rect>
-      <x>504</x>
-      <y>520</y>
+      <x>770</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="value">
@@ -226,14 +232,14 @@
    <widget class="QProgressBar" name="progressBar_12">
     <property name="geometry">
      <rect>
-      <x>514</x>
-      <y>520</y>
+      <x>780</x>
+      <y>670</y>
       <width>16</width>
-      <height>41</height>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 255, 0);</string>
+     <string notr="true">color: rgb(85, 255, 127);</string>
     </property>
     <property name="value">
      <number>24</number>
@@ -245,10 +251,10 @@
    <widget class="QDial" name="dial">
     <property name="geometry">
      <rect>
-      <x>295</x>
-      <y>510</y>
-      <width>71</width>
-      <height>51</height>
+      <x>530</x>
+      <y>650</y>
+      <width>75</width>
+      <height>75</height>
      </rect>
     </property>
     <property name="pageStep">
@@ -279,8 +285,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>357</x>
-      <y>560</y>
+      <x>625</x>
+      <y>730</y>
       <width>171</width>
       <height>17</height>
      </rect>
@@ -302,11 +308,20 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>560</y>
+      <x>550</x>
+      <y>720</y>
       <width>41</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Cantarell Extra Bold</family>
+      <pointsize>10</pointsize>
+      <weight>10</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">
@@ -317,27 +332,19 @@ color: rgb(0, 170, 255);</string>
      <string>Power</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>771</width>
-      <height>571</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>13</x>
-      <y>510</y>
-      <width>211</width>
+      <x>30</x>
+      <y>669</y>
+      <width>61</width>
       <height>17</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(0, 170, 255);</string>
@@ -349,11 +356,16 @@ color: rgb(0, 170, 255);</string>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>530</y>
-      <width>191</width>
+      <x>10</x>
+      <y>689</y>
+      <width>71</width>
       <height>17</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(0, 170, 255);</string>
@@ -365,11 +377,16 @@ color: rgb(0, 170, 255);</string>
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>13</x>
-      <y>550</y>
-      <width>191</width>
+      <x>30</x>
+      <y>709</y>
+      <width>61</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(0, 170, 255);</string>
@@ -378,17 +395,113 @@ color: rgb(0, 170, 255);</string>
      <string>Time:</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>669</y>
+      <width>62</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>None</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>689</y>
+      <width>62</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>None</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>710</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>None</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>629</y>
+      <width>1331</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="lineWidth">
+     <number>10</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>660</y>
+      <width>501</width>
+      <height>81</height>
+     </rect>
+    </property>
+   </widget>
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>500</y>
-      <width>81</width>
-      <height>71</height>
+      <x>0</x>
+      <y>0</y>
+      <width>1361</width>
+      <height>631</height>
      </rect>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>1270</x>
+      <y>10</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>
