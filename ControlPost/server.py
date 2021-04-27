@@ -132,7 +132,7 @@ class MainRovPult:
         self.mainLogger.start()
         self.mainKeyboard.start()
 
-        # self.InitApp()
+        self.InitApp()
 
 
 class ServerMainPult:
@@ -436,85 +436,201 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(1366, 768)
+        MainWindow.resize(1366, 700)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
+        MainWindow.setStyleSheet("background-color: rgb(40, 40, 40);")
         MainWindow.setIconSize(QtCore.QSize(25, 25))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(620, 670, 16, 60))
+        self.progressBar.setGeometry(QtCore.QRect(625, 600, 6, 60))
+        self.progressBar.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar.setProperty("value", 24)
+        self.progressBar.setTextVisible(False)
         self.progressBar.setOrientation(QtCore.Qt.Vertical)
         self.progressBar.setObjectName("progressBar")
         self.progressBar_2 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_2.setGeometry(QtCore.QRect(630, 670, 16, 60))
+        self.progressBar_2.setGeometry(QtCore.QRect(635, 600, 6, 60))
         self.progressBar_2.setAutoFillBackground(False)
-        self.progressBar_2.setStyleSheet("color: rgb(85, 255, 127);")
+        self.progressBar_2.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_2.setProperty("value", 24)
-        self.progressBar_2.setTextVisible(True)
+        self.progressBar_2.setTextVisible(False)
         self.progressBar_2.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_2.setInvertedAppearance(False)
         self.progressBar_2.setObjectName("progressBar_2")
         self.progressBar_3 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_3.setGeometry(QtCore.QRect(650, 670, 16, 60))
+        self.progressBar_3.setGeometry(QtCore.QRect(657, 600, 6, 60))
+        self.progressBar_3.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_3.setProperty("value", 24)
+        self.progressBar_3.setTextVisible(False)
         self.progressBar_3.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_3.setObjectName("progressBar_3")
         self.progressBar_4 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_4.setGeometry(QtCore.QRect(660, 670, 16, 60))
-        self.progressBar_4.setStyleSheet("color: rgb(85, 255, 127);")
+        self.progressBar_4.setGeometry(QtCore.QRect(667, 600, 6, 60))
+        self.progressBar_4.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_4.setProperty("value", 24)
+        self.progressBar_4.setTextVisible(False)
         self.progressBar_4.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_4.setObjectName("progressBar_4")
         self.progressBar_5 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_5.setGeometry(QtCore.QRect(680, 670, 16, 60))
+        self.progressBar_5.setGeometry(QtCore.QRect(687, 600, 6, 60))
+        self.progressBar_5.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_5.setProperty("value", 24)
+        self.progressBar_5.setTextVisible(False)
         self.progressBar_5.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_5.setObjectName("progressBar_5")
         self.progressBar_6 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_6.setGeometry(QtCore.QRect(690, 670, 16, 60))
-        self.progressBar_6.setStyleSheet("color: rgb(85, 255, 127);")
+        self.progressBar_6.setGeometry(QtCore.QRect(697, 600, 6, 60))
+        self.progressBar_6.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_6.setProperty("value", 24)
+        self.progressBar_6.setTextVisible(False)
         self.progressBar_6.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_6.setObjectName("progressBar_6")
         self.progressBar_7 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_7.setGeometry(QtCore.QRect(710, 670, 16, 60))
+        self.progressBar_7.setGeometry(QtCore.QRect(720, 600, 6, 60))
+        self.progressBar_7.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_7.setProperty("value", 24)
+        self.progressBar_7.setTextVisible(False)
         self.progressBar_7.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_7.setObjectName("progressBar_7")
         self.progressBar_8 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_8.setGeometry(QtCore.QRect(720, 670, 16, 60))
-        self.progressBar_8.setStyleSheet("color: rgb(85, 255, 0);\n"
-"color: rgb(85, 255, 127);")
+        self.progressBar_8.setGeometry(QtCore.QRect(730, 600, 6, 60))
+        self.progressBar_8.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_8.setProperty("value", 24)
+        self.progressBar_8.setTextVisible(False)
         self.progressBar_8.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_8.setObjectName("progressBar_8")
         self.progressBar_9 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_9.setGeometry(QtCore.QRect(740, 670, 16, 60))
+        self.progressBar_9.setGeometry(QtCore.QRect(750, 600, 6, 60))
+        self.progressBar_9.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_9.setProperty("value", 24)
+        self.progressBar_9.setTextVisible(False)
         self.progressBar_9.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_9.setObjectName("progressBar_9")
         self.progressBar_10 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_10.setGeometry(QtCore.QRect(750, 670, 16, 60))
-        self.progressBar_10.setStyleSheet("color: rgb(85, 255, 127);")
+        self.progressBar_10.setGeometry(QtCore.QRect(760, 600, 6, 60))
+        self.progressBar_10.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_10.setProperty("value", 24)
+        self.progressBar_10.setTextVisible(False)
         self.progressBar_10.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_10.setObjectName("progressBar_10")
         self.progressBar_11 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_11.setGeometry(QtCore.QRect(770, 670, 16, 60))
+        self.progressBar_11.setGeometry(QtCore.QRect(780, 600, 6, 60))
+        self.progressBar_11.setStyleSheet("QProgressBar {\n"
+"    \n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"    \n"
+"    background-color: rgb(0, 170, 255);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_11.setProperty("value", 24)
+        self.progressBar_11.setTextVisible(False)
         self.progressBar_11.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_11.setObjectName("progressBar_11")
         self.progressBar_12 = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar_12.setGeometry(QtCore.QRect(780, 670, 16, 60))
-        self.progressBar_12.setStyleSheet("color: rgb(85, 255, 127);")
+        self.progressBar_12.setGeometry(QtCore.QRect(790, 600, 6, 60))
+        self.progressBar_12.setStyleSheet("QProgressBar {\n"
+"    background-color: rgb(100, 100, 100);\n"
+"    border-radius: 3px;\n"
+"}\n"
+"\n"
+"QProgressBar::chunk {\n"
+"background-color: rgb(0, 255, 127);\n"
+"    border-radius: 3px\n"
+"}")
         self.progressBar_12.setProperty("value", 24)
+        self.progressBar_12.setTextVisible(False)
         self.progressBar_12.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_12.setObjectName("progressBar_12")
         self.dial = QtWidgets.QDial(self.centralwidget)
-        self.dial.setGeometry(QtCore.QRect(530, 650, 75, 75))
+        self.dial.setGeometry(QtCore.QRect(530, 580, 75, 75))
+        self.dial.setStyleSheet("background-color: rgb(120, 120, 120);")
         self.dial.setPageStep(100)
         self.dial.setTracking(True)
         self.dial.setOrientation(QtCore.Qt.Vertical)
@@ -525,14 +641,14 @@ class Ui_MainWindow(object):
         self.dial.setNotchesVisible(True)
         self.dial.setObjectName("dial")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(625, 730, 171, 17))
+        self.label.setGeometry(QtCore.QRect(625, 660, 191, 17))
         self.label.setStyleSheet("font: 10pt \"Lato\";\n"
 "font: 75 10pt \"Cantarell\";\n"
 "font: 75 oblique 10pt \"DejaVu Sans\";\n"
 "color: rgb(85, 170, 255);")
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(550, 720, 41, 31))
+        self.label_2.setGeometry(QtCore.QRect(550, 650, 41, 31))
         font = QtGui.QFont()
         font.setFamily("Cantarell Extra Bold")
         font.setPointSize(10)
@@ -545,61 +661,72 @@ class Ui_MainWindow(object):
 "color: rgb(0, 170, 255);")
         self.label_2.setObjectName("label_2")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(30, 669, 61, 17))
+        self.label_4.setGeometry(QtCore.QRect(30, 599, 61, 17))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_4.setFont(font)
         self.label_4.setStyleSheet("color: rgb(0, 170, 255);")
         self.label_4.setObjectName("label_4")
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(10, 689, 71, 17))
+        self.label_5.setGeometry(QtCore.QRect(10, 619, 71, 17))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_5.setFont(font)
         self.label_5.setStyleSheet("color: rgb(0, 170, 255);")
         self.label_5.setObjectName("label_5")
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setGeometry(QtCore.QRect(30, 709, 61, 21))
+        self.label_6.setGeometry(QtCore.QRect(30, 639, 61, 21))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_6.setFont(font)
         self.label_6.setStyleSheet("color: rgb(0, 170, 255);")
         self.label_6.setObjectName("label_6")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(90, 669, 62, 17))
+        self.label_3.setGeometry(QtCore.QRect(90, 599, 62, 17))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        self.label_8.setGeometry(QtCore.QRect(90, 689, 62, 21))
+        self.label_8.setGeometry(QtCore.QRect(90, 619, 62, 21))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_8.setFont(font)
         self.label_8.setObjectName("label_8")
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
-        self.label_9.setGeometry(QtCore.QRect(90, 710, 161, 21))
+        self.label_9.setGeometry(QtCore.QRect(90, 640, 61, 21))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
-        self.line = QtWidgets.QFrame(self.centralwidget)
-        self.line.setGeometry(QtCore.QRect(20, 629, 1331, 31))
-        self.line.setStyleSheet("")
-        self.line.setLineWidth(10)
-        self.line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
-        self.textEdit.setGeometry(QtCore.QRect(850, 660, 501, 81))
+        self.textEdit.setGeometry(QtCore.QRect(850, 590, 501, 81))
         self.textEdit.setObjectName("textEdit")
         self.label_7 = QtWidgets.QLabel(self.centralwidget)
-        self.label_7.setGeometry(QtCore.QRect(0, 0, 1361, 631))
+        self.label_7.setGeometry(QtCore.QRect(0, 0, 1361, 561))
         self.label_7.setText("")
         self.label_7.setObjectName("label_7")
         self.label_10 = QtWidgets.QLabel(self.centralwidget)
         self.label_10.setGeometry(QtCore.QRect(1270, 10, 81, 81))
         self.label_10.setObjectName("label_10")
+        self.line = QtWidgets.QFrame(self.centralwidget)
+        self.line.setGeometry(QtCore.QRect(0, 570, 1361, 10))
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.label_11 = QtWidgets.QLabel(self.centralwidget)
+        self.label_11.setGeometry(QtCore.QRect(220, 600, 61, 17))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_11.setFont(font)
+        self.label_11.setObjectName("label_11")
+        self.label_12 = QtWidgets.QLabel(self.centralwidget)
+        self.label_12.setGeometry(QtCore.QRect(170, 600, 41, 17))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_12.setFont(font)
+        self.label_12.setStyleSheet("color: rgb(0, 170, 255);")
+        self.label_12.setObjectName("label_12")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -624,7 +751,8 @@ class Ui_MainWindow(object):
         self.label_8.setText(_translate("MainWindow", "None"))
         self.label_9.setText(_translate("MainWindow", "None"))
         self.label_10.setText(_translate("MainWindow", "TextLabel"))
-
+        self.label_11.setText(_translate("MainWindow", "None"))
+        self.label_12.setText(_translate("MainWindow", "Volt:"))
 
 
 class APPGui():  # класс описывающий работу приложение
