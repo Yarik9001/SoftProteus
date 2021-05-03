@@ -17,13 +17,13 @@ except:
         system('sudo pip install pyPS4Controller')
 
 # модуль для управления с клавиатуры
-# try:
-#     from keyboard import wait, on_release_key, on_press_key
-# except:
-#     try:
-#         system('pip install keyboard')
-#     except:
-#         system('sudo pip install keyboard')
+try:
+    from keyboard import wait, on_release_key, on_press_key
+except:
+    try:
+        system('pip install keyboard')
+    except:
+        system('sudo pip install keyboard')
 
 # часть связанная с графическим интерфейсом
 import sys
@@ -33,7 +33,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class MainRovPult:
     def __init__(self):
         self.startTime = str(datetime.now())
-
+        
         # считывание конфиг файлов
         self.config = ConfigParser()
         self.config.read("Soft/ControlPost/settings.ini")
@@ -54,7 +54,11 @@ class MainRovPult:
         self.P = literal_eval(self.config["RovSettings"]["P"])
         self.I = literal_eval(self.config["RovSettings"]["I"])
         self.D = literal_eval(self.config["RovSettings"]["D"])
-
+        
+        self.logger = LogerTXT(self)
+        self.logger.WritelogSis('Start the MainRovPult')
+        self.logger.WritelogSis('Init config')
+        
         if self.logcmd:
             self.variablePrint()
 
@@ -74,6 +78,7 @@ class MainRovPult:
 
     # инициализация сервера
     def InitServer(self, *args):
+        self.logger.WritelogSis('Init server')
         self.server = ServerMainPult(
             log=self.log,
             logcmd=self.logcmd,
@@ -89,7 +94,7 @@ class MainRovPult:
     # инициализация логирования
     def InitLogger(self, *args):
         if self.log and (self.logOutput or self.logInput):
-            self.logger = LogerTXT(self)
+            self.logger.WritelogSis('Init logger')
             if self.logInput:
                 loginp = threading.Thread(
                     target=self.logger.WritelogInput, args=(self.logger,))
@@ -99,22 +104,20 @@ class MainRovPult:
                     target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
 
-    # инициализация приложения
-
-    def InitApp(self, *args):
-        self.QuiROV = APPGui()
-        self.QuiROV.main()
 
     def InitJoystick(self, *args):
+        self.logger.WritelogSis('Init InitJoystick')
         # TODO Сделать опрос джойстика и инициализацию обьекта класса джойстик
         pass
 
-    # def InitKeyboardPult(self, *args):
-    #     self.keyboardPult = MyControllerKeyboard(self.server)
-    #     self.keyboardPult.mainKeyboard()
+    def InitKeyboardPult(self, *args):
+        self.logger.WritelogSis('Init KeyboardPult')
+        self.keyboardPult = MyControllerKeyboard(self.server)
+        self.keyboardPult.mainKeyboard()
 
     # инициализация основного цикла
     def MAIN(self):
+        self.logger.WritelogSis('Starting threading')
         self.mainserver = threading.Thread(
             target=self.InitServer, args=(self,))
 
@@ -124,15 +127,15 @@ class MainRovPult:
         self.mainLogger = threading.Thread(
             target=self.InitLogger, args=(self,))
 
-        # self.mainKeyboard = threading.Thread(
-        #     target=self.InitKeyboardPult, args=(self,))
+        self.mainKeyboard = threading.Thread(
+            target=self.InitKeyboardPult, args=(self,))
 
         self.mainserver.start()
         self.mainJoistik.start()
         self.mainLogger.start()
-        # self.mainKeyboard.start()
+        self.mainKeyboard.start()
 
-        self.InitApp()
+
 
 
 class ServerMainPult:
@@ -239,121 +242,132 @@ class ServerMainPult:
         self.startmultithreading()
 
 
-# class MyControllerKeyboard:
-#     '''
-#     Класс для резервного управления ROV с помощью клавиатуры ноутбука 
-#     вперед - w
-#     назад - s
-#     вправо - a
-#     влево - d
-#     вверх - up
-#     вниз - down  
-#     поворот влево - left
-#     поворот направо - right
-#     '''
+class MyControllerKeyboard:
+    '''
+    Класс для резервного управления ROV с помощью клавиатуры ноутбука 
+    вперед - w
+    назад - s
+    вправо - a
+    влево - d
+    вверх - up
+    вниз - down  
+    поворот влево - left
+    поворот направо - right
+    '''
 
-#     def __init__(self, pult: ServerMainPult):
-#         self.pult = pult
+    def __init__(self, pult: ServerMainPult):
+        self.pult = pult
 
-#     def mainKeyboard(self):
-#         on_press_key('w', self.forward, suppress=False)
-#         on_release_key('w', self.forward_release, suppress=False)
-#         on_press_key('s', self.back, suppress=False)
-#         on_release_key('s', self.back_release, suppress=False)
-#         on_press_key('a', self.left, suppress=False)
-#         on_release_key('a', self.left_relaese, suppress=False)
-#         on_press_key('d', self.right, suppress=False)
-#         on_release_key('d', self.right_relaese, suppress=False)
-#         on_press_key('up', self.up, suppress=False)
-#         on_release_key('up', self.up_relaese, suppress=False)
-#         on_press_key('down', self.down, suppress=False)
-#         on_release_key('down', self.down_relaese, suppress=False)
-#         on_press_key('left', self.turn_left, suppress=False)
-#         on_release_key('left', self.turn_left_relaese, suppress=False)
-#         on_press_key('right', self.turn_right, suppress=False)
-#         on_release_key('right', self.turn_right_relaese, suppress=False)
-#         wait()
+    def mainKeyboard(self):
+        on_press_key('w', self.forward, suppress=False)
+        on_release_key('w', self.forward_release, suppress=False)
+        on_press_key('s', self.back, suppress=False)
+        on_release_key('s', self.back_release, suppress=False)
+        on_press_key('a', self.left, suppress=False)
+        on_release_key('a', self.left_relaese, suppress=False)
+        on_press_key('d', self.right, suppress=False)
+        on_release_key('d', self.right_relaese, suppress=False)
+        on_press_key('up', self.up, suppress=False)
+        on_release_key('up', self.up_relaese, suppress=False)
+        on_press_key('down', self.down, suppress=False)
+        on_release_key('down', self.down_relaese, suppress=False)
+        on_press_key('left', self.turn_left, suppress=False)
+        on_release_key('left', self.turn_left_relaese, suppress=False)
+        on_press_key('right', self.turn_right, suppress=False)
+        on_release_key('right', self.turn_right_relaese, suppress=False)
+        wait()
 
-#     def forward(self, key):
-#         self.pult.DataOutput['y'] = 32767
-#         if self.pult.logcmd:
-#             print('forward')
+    def forward(self, key):
+        self.pult.DataOutput['y'] = 32767
+        if self.pult.logcmd:
+            print('forward')
 
-#     def forward_release(self, key):
-#         self.pult.DataOutput['y'] = 0
-#         if self.pult.logcmd:
-#             print('forward-stop')
+    def forward_release(self, key):
+        self.pult.DataOutput['y'] = 0
+        if self.pult.logcmd:
+            print('forward-stop')
 
-#     def back(self, key):
-#         self.pult.DataOutput['y'] = -32767
-#         if self.pult.logcmd:
-#             print('back')
+    def back(self, key):
+        self.pult.DataOutput['y'] = -32767
+        if self.pult.logcmd:
+            print('back')
 
-#     def back_release(self, key):
-#         self.pult.DataOutput['y'] = 0
-#         if self.pult.logcmd:
-#             print('back-relaese')
+    def back_release(self, key):
+        self.pult.DataOutput['y'] = 0
+        if self.pult.logcmd:
+            print('back-relaese')
 
-#     def left(self, key):
-#         self.pult.DataOutput['x'] = -32767
-#         if self.pult.logcmd:
-#             print('left')
+    def left(self, key):
+        self.pult.DataOutput['x'] = -32767
+        if self.pult.logcmd:
+            print('left')
 
-#     def left_relaese(self, key):
-#         self.pult.DataOutput['x'] = 0
-#         if self.pult.logcmd:
-#             print('left_relaese')
+    def left_relaese(self, key):
+        self.pult.DataOutput['x'] = 0
+        if self.pult.logcmd:
+            print('left_relaese')
 
-#     def right(self, key):
-#         self.pult.DataOutput['x'] = 32767
-#         if self.pult.logcmd:
-#             print('right')
+    def right(self, key):
+        self.pult.DataOutput['x'] = 32767
+        if self.pult.logcmd:
+            print('right')
 
-#     def right_relaese(self, key):
-#         self.pult.DataOutput['x'] = 0
-#         if self.pult.logcmd:
-#             print('right-relaese')
+    def right_relaese(self, key):
+        self.pult.DataOutput['x'] = 0
+        if self.pult.logcmd:
+            print('right-relaese')
 
-#     def up(self, key):
-#         self.pult.DataOutput['z'] = 32767
-#         if self.pult.logcmd:
-#             print('up')
+    def up(self, key):
+        self.pult.DataOutput['z'] = 32767
+        if self.pult.logcmd:
+            print('up')
 
-#     def up_relaese(self, key):
-#         self.pult.DataOutput['z'] = 0
-#         if self.pult.logcmd:
-#             print('up-relaese')
+    def up_relaese(self, key):
+        self.pult.DataOutput['z'] = 0
+        if self.pult.logcmd:
+            print('up-relaese')
 
-#     def down(self, key):
-#         self.pult.DataOutput['z'] = -32767
-#         if self.pult.logcmd:
-#             print('down')
+    def down(self, key):
+        self.pult.DataOutput['z'] = -32767
+        if self.pult.logcmd:
+            print('down')
 
-#     def down_relaese(self, key):
-#         self.pult.DataOutput['z'] = 0
-#         if self.pult.logcmd:
-#             print('down-relaese')
+    def down_relaese(self, key):
+        self.pult.DataOutput['z'] = 0
+        if self.pult.logcmd:
+            print('down-relaese')
 
-#     def turn_left(self, key):
-#         self.pult.DataOutput['r'] = -32767
-#         if self.pult.logcmd:
-#             print('turn-left')
+    def turn_left(self, key):
+        self.pult.DataOutput['r'] = -32767
+        if self.pult.logcmd:
+            print('turn-left')
 
-#     def turn_left_relaese(self, key):
-#         self.pult.DataOutput['r'] = 0
-#         if self.pult.logcmd:
-#             print('turn-stop')
+    def turn_left_relaese(self, key):
+        self.pult.DataOutput['r'] = 0
+        if self.pult.logcmd:
+            print('turn-stop')
 
-#     def turn_right(self, key):
-#         self.pult.DataOutput['r'] = 32767
-#         if self.pult.logcmd:
-#             print('turn-right')
+    def turn_right(self, key):
+        self.pult.DataOutput['r'] = 32767
+        if self.pult.logcmd:
+            print('turn-right')
 
-#     def turn_right_relaese(self, key):
-#         self.pult.DataOutput['r'] = 0
-#         if self.pult.logcmd:
-#             print('turn-stop')
+    def turn_right_relaese(self, key):
+        self.pult.DataOutput['r'] = 0
+        if self.pult.logcmd:
+            print('turn-stop')
 
+class MyController(Controller):
+    '''
+    Класс для взаимодействия с джойстиком PS4 
+    (работает только из под линукса из под винды управление только с помощью клавиатуры)
+    '''
+    def __init__(self, **kwargs):
+        Controller.__init__(self, **kwargs)
+        
+    def mainMycontroller(self):
+        controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+        controller.listen()
 
 class LogerTXT:
     '''
@@ -373,25 +387,33 @@ class LogerTXT:
         NameRov = self.rov.name
         time = '-'.join('-'.join('-'.join(time.split()).split('.')).split(':'))
 
-        self.namefileInput = "ControlPost/log/" + f'INPUT-{NameRov}-{time}.txt'
-        self.namefileOutput = "ControlPost/log/" + \
+        self.namefileSistem = "Soft/ControlPost/log/sistem/" + \
+            f'{NameRov}-sis-{time}.txt'
+        self.namefileInput = "Soft/ControlPost/log/input/" + \
+            f'INPUT-{NameRov}-{time}.txt'
+        self.namefileOutput = "Soft/ControlPost/log/output/" + \
             f'OUTPUT-{NameRov}-{time}.txt'
 
         # обработка ошибки с некорректным путем
         try:
             self.fileInput = open(self.namefileInput, "a+")
             self.fileOutput = open(self.namefileOutput, 'a+')
+            self.fileSis = open(self.namefileSistem, 'a+')
         except:
             self.fileInput = open(f'INPUT-{NameRov}-{time}.txt', "a+")
             self.fileOutput = open(f'OUTPUT-{NameRov}-{time}.txt', "a+")
+            self.fileSis = open(f'{NameRov}-sis-{time}.txt', "a+")
 
         # запись шапки
         self.fileInput.write(f"NameRov: {NameRov}\n")
         self.fileInput.write(f'Time: {time}\n')
         self.fileOutput.write(f"NameRov: {NameRov}\n")
         self.fileOutput.write(f'Time: {time}\n')
+        self.fileSis.write(f"NameRov: {NameRov}\n")
+        self.fileSis.write(f'Time: {time}\n')
         self.fileInput.close()
         self.fileOutput.close()
+        self.fileSis.close()
 
     # логирование принятой информации раз в секунду
     # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
@@ -422,11 +444,13 @@ class LogerTXT:
                 self.fileOutput.write(inf+'\n')
                 self.fileOutput.close()
                 sleep(self.ratelog)
-
-
-class MyController(Controller):
-    # TODO класс взаимодействия с джойстиком +-
-    pass
+                
+    # запись системных логов 
+    def WritelogSis(self, text):
+        timelog = str(datetime.now())
+        self.fileSis = open(self.namefileSistem, 'a+')
+        self.fileSis.write(timelog +' - '+ text + '\n')
+        self.fileSis.close()
 
 
 
@@ -446,14 +470,14 @@ class Ui_MainWindow(object):
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar.setGeometry(QtCore.QRect(625, 600, 6, 60))
         self.progressBar.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                       "    background-color: rgb(100, 100, 100);\n"
+                                       "    border-radius: 3px;\n"
+                                       "}\n"
+                                       "\n"
+                                       "QProgressBar::chunk {\n"
+                                       "    background-color: rgb(0, 170, 255);\n"
+                                       "    border-radius: 3px\n"
+                                       "}")
         self.progressBar.setProperty("value", 24)
         self.progressBar.setTextVisible(False)
         self.progressBar.setOrientation(QtCore.Qt.Vertical)
@@ -462,14 +486,14 @@ class Ui_MainWindow(object):
         self.progressBar_2.setGeometry(QtCore.QRect(635, 600, 6, 60))
         self.progressBar_2.setAutoFillBackground(False)
         self.progressBar_2.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "background-color: rgb(0, 255, 127);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_2.setProperty("value", 24)
         self.progressBar_2.setTextVisible(False)
         self.progressBar_2.setOrientation(QtCore.Qt.Vertical)
@@ -478,14 +502,14 @@ class Ui_MainWindow(object):
         self.progressBar_3 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_3.setGeometry(QtCore.QRect(657, 600, 6, 60))
         self.progressBar_3.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "    background-color: rgb(0, 170, 255);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_3.setProperty("value", 24)
         self.progressBar_3.setTextVisible(False)
         self.progressBar_3.setOrientation(QtCore.Qt.Vertical)
@@ -493,14 +517,14 @@ class Ui_MainWindow(object):
         self.progressBar_4 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_4.setGeometry(QtCore.QRect(667, 600, 6, 60))
         self.progressBar_4.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "background-color: rgb(0, 255, 127);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_4.setProperty("value", 24)
         self.progressBar_4.setTextVisible(False)
         self.progressBar_4.setOrientation(QtCore.Qt.Vertical)
@@ -508,14 +532,14 @@ class Ui_MainWindow(object):
         self.progressBar_5 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_5.setGeometry(QtCore.QRect(687, 600, 6, 60))
         self.progressBar_5.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "    background-color: rgb(0, 170, 255);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_5.setProperty("value", 24)
         self.progressBar_5.setTextVisible(False)
         self.progressBar_5.setOrientation(QtCore.Qt.Vertical)
@@ -523,14 +547,14 @@ class Ui_MainWindow(object):
         self.progressBar_6 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_6.setGeometry(QtCore.QRect(697, 600, 6, 60))
         self.progressBar_6.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "background-color: rgb(0, 255, 127);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_6.setProperty("value", 24)
         self.progressBar_6.setTextVisible(False)
         self.progressBar_6.setOrientation(QtCore.Qt.Vertical)
@@ -538,14 +562,14 @@ class Ui_MainWindow(object):
         self.progressBar_7 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_7.setGeometry(QtCore.QRect(720, 600, 6, 60))
         self.progressBar_7.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "    background-color: rgb(0, 170, 255);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_7.setProperty("value", 24)
         self.progressBar_7.setTextVisible(False)
         self.progressBar_7.setOrientation(QtCore.Qt.Vertical)
@@ -553,14 +577,14 @@ class Ui_MainWindow(object):
         self.progressBar_8 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_8.setGeometry(QtCore.QRect(730, 600, 6, 60))
         self.progressBar_8.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "background-color: rgb(0, 255, 127);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_8.setProperty("value", 24)
         self.progressBar_8.setTextVisible(False)
         self.progressBar_8.setOrientation(QtCore.Qt.Vertical)
@@ -568,14 +592,14 @@ class Ui_MainWindow(object):
         self.progressBar_9 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_9.setGeometry(QtCore.QRect(750, 600, 6, 60))
         self.progressBar_9.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                         "    background-color: rgb(100, 100, 100);\n"
+                                         "    border-radius: 3px;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QProgressBar::chunk {\n"
+                                         "    background-color: rgb(0, 170, 255);\n"
+                                         "    border-radius: 3px\n"
+                                         "}")
         self.progressBar_9.setProperty("value", 24)
         self.progressBar_9.setTextVisible(False)
         self.progressBar_9.setOrientation(QtCore.Qt.Vertical)
@@ -583,14 +607,14 @@ class Ui_MainWindow(object):
         self.progressBar_10 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_10.setGeometry(QtCore.QRect(760, 600, 6, 60))
         self.progressBar_10.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                          "    background-color: rgb(100, 100, 100);\n"
+                                          "    border-radius: 3px;\n"
+                                          "}\n"
+                                          "\n"
+                                          "QProgressBar::chunk {\n"
+                                          "background-color: rgb(0, 255, 127);\n"
+                                          "    border-radius: 3px\n"
+                                          "}")
         self.progressBar_10.setProperty("value", 24)
         self.progressBar_10.setTextVisible(False)
         self.progressBar_10.setOrientation(QtCore.Qt.Vertical)
@@ -598,16 +622,16 @@ class Ui_MainWindow(object):
         self.progressBar_11 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_11.setGeometry(QtCore.QRect(780, 600, 6, 60))
         self.progressBar_11.setStyleSheet("QProgressBar {\n"
-"    \n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"    \n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border-radius: 3px\n"
-"}")
+                                          "    \n"
+                                          "    background-color: rgb(100, 100, 100);\n"
+                                          "    border-radius: 3px;\n"
+                                          "}\n"
+                                          "\n"
+                                          "QProgressBar::chunk {\n"
+                                          "    \n"
+                                          "    background-color: rgb(0, 170, 255);\n"
+                                          "    border-radius: 3px\n"
+                                          "}")
         self.progressBar_11.setProperty("value", 24)
         self.progressBar_11.setTextVisible(False)
         self.progressBar_11.setOrientation(QtCore.Qt.Vertical)
@@ -615,14 +639,14 @@ class Ui_MainWindow(object):
         self.progressBar_12 = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar_12.setGeometry(QtCore.QRect(790, 600, 6, 60))
         self.progressBar_12.setStyleSheet("QProgressBar {\n"
-"    background-color: rgb(100, 100, 100);\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QProgressBar::chunk {\n"
-"background-color: rgb(0, 255, 127);\n"
-"    border-radius: 3px\n"
-"}")
+                                          "    background-color: rgb(100, 100, 100);\n"
+                                          "    border-radius: 3px;\n"
+                                          "}\n"
+                                          "\n"
+                                          "QProgressBar::chunk {\n"
+                                          "background-color: rgb(0, 255, 127);\n"
+                                          "    border-radius: 3px\n"
+                                          "}")
         self.progressBar_12.setProperty("value", 24)
         self.progressBar_12.setTextVisible(False)
         self.progressBar_12.setOrientation(QtCore.Qt.Vertical)
@@ -642,9 +666,9 @@ class Ui_MainWindow(object):
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(625, 660, 191, 17))
         self.label.setStyleSheet("font: 10pt \"Lato\";\n"
-"font: 75 10pt \"Cantarell\";\n"
-"font: 75 oblique 10pt \"DejaVu Sans\";\n"
-"color: rgb(85, 170, 255);")
+                                 "font: 75 10pt \"Cantarell\";\n"
+                                 "font: 75 oblique 10pt \"DejaVu Sans\";\n"
+                                 "color: rgb(85, 170, 255);")
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(550, 650, 41, 31))
@@ -656,8 +680,8 @@ class Ui_MainWindow(object):
         font.setWeight(10)
         self.label_2.setFont(font)
         self.label_2.setStyleSheet("\n"
-"font: 81 10pt \"Cantarell Extra Bold\";\n"
-"color: rgb(0, 170, 255);")
+                                   "font: 81 10pt \"Cantarell Extra Bold\";\n"
+                                   "color: rgb(0, 170, 255);")
         self.label_2.setObjectName("label_2")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(30, 599, 61, 17))
@@ -738,10 +762,10 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "ROV-0.1"))
         self.label.setText(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'DejaVu Sans\'; font-size:10pt; font-weight:72; font-style:italic;\">\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; font-style:normal;\">M1   M2   M3   M4   M5   M6</span></p></body></html>"))
+                                      "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                      "p, li { white-space: pre-wrap; }\n"
+                                      "</style></head><body style=\" font-family:\'DejaVu Sans\'; font-size:10pt; font-weight:72; font-style:italic;\">\n"
+                                      "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600; font-style:normal;\">M1   M2   M3   M4   M5   M6</span></p></body></html>"))
         self.label_2.setText(_translate("MainWindow", "Power"))
         self.label_4.setText(_translate("MainWindow", "Dept:"))
         self.label_5.setText(_translate("MainWindow", "Azimut:"))
