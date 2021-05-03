@@ -5,8 +5,6 @@ from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from configparser import ConfigParser  # мудуль для работы с конфиг файлами
 from os import system
-
-
 # модуль для работы с джойстиком ps2
 try:
     from pyPS4Controller.controller import Controller
@@ -15,17 +13,14 @@ except:
         system('pip install pyPS4Controller')
     except:
         system('sudo pip install pyPS4Controller')
-
 # модуль для управления с клавиатуры
-if False:
+try:
+    from keyboard import wait, on_release_key, on_press_key
+except:
     try:
-        from keyboard import wait, on_release_key, on_press_key
+        system('pip install keyboard')
     except:
-        try:
-            system('pip install keyboard')
-        except:
-            system('sudo pip install keyboard')
-
+        system('sudo pip install keyboard')
 # часть связанная с графическим интерфейсом
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -34,12 +29,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class MainRovPult:
     def __init__(self):
         self.startTime = str(datetime.now())
-        
+
         # считывание конфиг файлов
         self.config = ConfigParser()
-		
-        self.config.read("/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
-        
+
+        self.config.read(
+            "/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
+
         self.host = literal_eval(self.config["Server"]["host"])
         self.port = literal_eval(self.config["Server"]["port"])
         self.log = literal_eval(self.config["Server"]["log"])
@@ -57,11 +53,11 @@ class MainRovPult:
         self.P = literal_eval(self.config["RovSettings"]["P"])
         self.I = literal_eval(self.config["RovSettings"]["I"])
         self.D = literal_eval(self.config["RovSettings"]["D"])
-        
+
         self.logger = LogerTXT(self)
         self.logger.WritelogSis('Start the MainRovPult')
         self.logger.WritelogSis('Init config')
-        
+
         if self.logcmd:
             self.variablePrint()
 
@@ -107,19 +103,17 @@ class MainRovPult:
                     target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
 
-
     def InitJoystick(self, *args):
         self.logger.WritelogSis('Init InitJoystick')
-        controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+        controller = MyController(
+            interface="/dev/input/js0", connecting_using_ds4drv=False)
         controller.listen()
         # TODO Сделать опрос джойстика и инициализацию обьекта класса джойстик
-        
-    
-    
-    # def InitKeyboardPult(self, *args):
-    #     self.logger.WritelogSis('Init KeyboardPult')
-    #     self.keyboardPult = MyControllerKeyboard(self.server)
-    #     self.keyboardPult.mainKeyboard()
+
+    def InitKeyboardPult(self, *args):
+        self.logger.WritelogSis('Init KeyboardPult')
+        self.keyboardPult = MyControllerKeyboard(self.server)
+        self.keyboardPult.mainKeyboard()
 
     # инициализация основного цикла
     def MAIN(self):
@@ -185,7 +179,6 @@ class ServerMainPult:
             'x': 0, 'y': 0, 'z': 0
         }
 
-
     def settingServer(self):
         # настройка сервера
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
@@ -244,121 +237,121 @@ class ServerMainPult:
         self.settingServer()
         self.startmultithreading()
 
-if False:
-    class MyControllerKeyboard:
-        '''
-        Класс для резервного управления ROV с помощью клавиатуры ноутбука 
-        вперед - w
-        назад - s
-        вправо - a
-        влево - d
-        вверх - up
-        вниз - down  
-        поворот влево - left
-        поворот направо - right
-        '''
-l
-        def __init__(self, pult: ServerMainPult):
-            self.pult = pult
 
-        def mainKeyboard(self):
-            on_press_key('w', self.forward, suppress=False)
-            on_release_key('w', self.forward_release, suppress=False)
-            on_press_key('s', self.back, suppress=False)
-            on_release_key('s', self.back_release, suppress=False)
-            on_press_key('a', self.left, suppress=False)
-            on_release_key('a', self.left_relaese, suppress=False)
-            on_press_key('d', self.right, suppress=False)
-            on_release_key('d', self.right_relaese, suppress=False)
-            on_press_key('up', self.up, suppress=False)
-            on_release_key('up', self.up_relaese, suppress=False)
-            on_press_key('down', self.down, suppress=False)
-            on_release_key('down', self.down_relaese, suppress=False)
-            on_press_key('left', self.turn_left, suppress=False)
-            on_release_key('left', self.turn_left_relaese, suppress=False)
-            on_press_key('right', self.turn_right, suppress=False)
-            on_release_key('right', self.turn_right_relaese, suppress=False)
-            wait()
+class MyControllerKeyboard:
+    '''
+    Класс для резервного управления ROV с помощью клавиатуры ноутбука 
+    вперед - w
+    назад - s
+    вправо - a
+    влево - d
+    вверх - up
+    вниз - down  
+    поворот влево - left
+    поворот направо - right
+    '''
 
-        def forward(self, key):
-            self.pult.DataOutput['y'] = 32767
-            if self.pult.logcmd:
-                print('forward')
+    def __init__(self, pult: ServerMainPult):
+        self.pult = pult
 
-        def forward_release(self, key):
-            self.pult.DataOutput['y'] = 0
-            if self.pult.logcmd:
-                print('forward-stop')
+    def mainKeyboard(self):
+        on_press_key('w', self.forward, suppress=False)
+        on_release_key('w', self.forward_release, suppress=False)
+        on_press_key('s', self.back, suppress=False)
+        on_release_key('s', self.back_release, suppress=False)
+        on_press_key('a', self.left, suppress=False)
+        on_release_key('a', self.left_relaese, suppress=False)
+        on_press_key('d', self.right, suppress=False)
+        on_release_key('d', self.right_relaese, suppress=False)
+        on_press_key('up', self.up, suppress=False)
+        on_release_key('up', self.up_relaese, suppress=False)
+        on_press_key('down', self.down, suppress=False)
+        on_release_key('down', self.down_relaese, suppress=False)
+        on_press_key('left', self.turn_left, suppress=False)
+        on_release_key('left', self.turn_left_relaese, suppress=False)
+        on_press_key('right', self.turn_right, suppress=False)
+        on_release_key('right', self.turn_right_relaese, suppress=False)
+        wait()
 
-        def back(self, key):
-            self.pult.DataOutput['y'] = -32767
-            if self.pult.logcmd:
-                print('back')
+    def forward(self, key):
+        self.pult.DataOutput['y'] = 32767
+        if self.pult.logcmd:
+            print('forward')
 
-        def back_release(self, key):
-            self.pult.DataOutput['y'] = 0
-            if self.pult.logcmd:
-                print('back-relaese')
+    def forward_release(self, key):
+        self.pult.DataOutput['y'] = 0
+        if self.pult.logcmd:
+            print('forward-stop')
 
-        def left(self, key):
-            self.pult.DataOutput['x'] = -32767
-            if self.pult.logcmd:
-                print('left')
+    def back(self, key):
+        self.pult.DataOutput['y'] = -32767
+        if self.pult.logcmd:
+            print('back')
 
-        def left_relaese(self, key):
-            self.pult.DataOutput['x'] = 0
-            if self.pult.logcmd:
-                print('left_relaese')
+    def back_release(self, key):
+        self.pult.DataOutput['y'] = 0
+        if self.pult.logcmd:
+            print('back-relaese')
 
-        def right(self, key):
-            self.pult.DataOutput['x'] = 32767
-            if self.pult.logcmd:
-                print('right')
+    def left(self, key):
+        self.pult.DataOutput['x'] = -32767
+        if self.pult.logcmd:
+            print('left')
 
-        def right_relaese(self, key):
-            self.pult.DataOutput['x'] = 0
-            if self.pult.logcmd:
-                print('right-relaese')
+    def left_relaese(self, key):
+        self.pult.DataOutput['x'] = 0
+        if self.pult.logcmd:
+            print('left_relaese')
 
-        def up(self, key):
-            self.pult.DataOutput['z'] = 32767
-            if self.pult.logcmd:
-                print('up')
+    def right(self, key):
+        self.pult.DataOutput['x'] = 32767
+        if self.pult.logcmd:
+            print('right')
 
-        def up_relaese(self, key):
-            self.pult.DataOutput['z'] = 0
-            if self.pult.logcmd:
-                print('up-relaese')
+    def right_relaese(self, key):
+        self.pult.DataOutput['x'] = 0
+        if self.pult.logcmd:
+            print('right-relaese')
 
-        def down(self, key):
-            self.pult.DataOutput['z'] = -32767
-            if self.pult.logcmd:
-                print('down')
+    def up(self, key):
+        self.pult.DataOutput['z'] = 32767
+        if self.pult.logcmd:
+            print('up')
 
-        def down_relaese(self, key):
-            self.pult.DataOutput['z'] = 0
-            if self.pult.logcmd:
-                print('down-relaese')
+    def up_relaese(self, key):
+        self.pult.DataOutput['z'] = 0
+        if self.pult.logcmd:
+            print('up-relaese')
 
-        def turn_left(self, key):
-            self.pult.DataOutput['r'] = -32767
-            if self.pult.logcmd:
-                print('turn-left')
+    def down(self, key):
+        self.pult.DataOutput['z'] = -32767
+        if self.pult.logcmd:
+            print('down')
 
-        def turn_left_relaese(self, key):
-            self.pult.DataOutput['r'] = 0
-            if self.pult.logcmd:
-                print('turn-stop')
+    def down_relaese(self, key):
+        self.pult.DataOutput['z'] = 0
+        if self.pult.logcmd:
+            print('down-relaese')
 
-        def turn_right(self, key):
-            self.pult.DataOutput['r'] = 32767
-            if self.pult.logcmd:
-                print('turn-right')
+    def turn_left(self, key):
+        self.pult.DataOutput['r'] = -32767
+        if self.pult.logcmd:
+            print('turn-left')
 
-        def turn_right_relaese(self, key):
-            self.pult.DataOutput['r'] = 0
-            if self.pult.logcmd:
-                print('turn-stop')
+    def turn_left_relaese(self, key):
+        self.pult.DataOutput['r'] = 0
+        if self.pult.logcmd:
+            print('turn-stop')
+
+    def turn_right(self, key):
+        self.pult.DataOutput['r'] = 32767
+        if self.pult.logcmd:
+            print('turn-right')
+
+    def turn_right_relaese(self, key):
+        self.pult.DataOutput['r'] = 0
+        if self.pult.logcmd:
+            print('turn-stop')
 
 
 class MyController(Controller):
@@ -366,9 +359,9 @@ class MyController(Controller):
     Класс для взаимодействия с джойстиком PS4 
     (работает только из под линукса из под винды управление только с помощью клавиатуры)
     '''
+
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
-        
 
 
 class LogerTXT:
@@ -446,15 +439,13 @@ class LogerTXT:
                 self.fileOutput.write(inf+'\n')
                 self.fileOutput.close()
                 sleep(self.ratelog)
-                
-    # запись системных логов 
+
+    # запись системных логов
     def WritelogSis(self, text):
         timelog = str(datetime.now())
         self.fileSis = open(self.namefileSistem, 'a+')
-        self.fileSis.write(timelog +' - '+ text + '\n')
+        self.fileSis.write(timelog + ' - ' + text + '\n')
         self.fileSis.close()
-
-
 
 
 class Ui_MainWindow(object):
