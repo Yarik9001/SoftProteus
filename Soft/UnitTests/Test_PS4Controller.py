@@ -11,14 +11,10 @@ def disconnect():
     pass
 
 class MyController(Controller):
-<<<<<<< HEAD
-    def __init__(self, **kwargs):
-        Controller.__init__(self, **kwargs)
-=======
-
+    
     def __init__(self):
         Controller.__init__(self,interface="/dev/input/js0", connecting_using_ds4drv=False)
->>>>>>> 691da8940b73ccc6f13e72eaa69bad015106477f
+
 
 
 controller = MyController()
