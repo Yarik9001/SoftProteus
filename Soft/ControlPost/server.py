@@ -21,6 +21,7 @@ except:
         system('pip install keyboard')
     except:
         system('sudo pip install keyboard')
+        
 # часть связанная с графическим интерфейсом
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -29,14 +30,21 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class MainRovPult:
     def __init__(self):
         self.startTime = str(datetime.now())
-
+        
         # считывание конфиг файлов
         self.config = ConfigParser()
-
-        self.config.read(
-            "/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
-
-        self.host = literal_eval(self.config["Server"]["host"])
+        # костыльный способ обработки запуска в разных операционках 
+        try:
+            self.config.read("Soft\ControlPost\settings.ini")
+            self.host = literal_eval(self.config["Server"]["host"])
+        except:
+            try:
+                self.config.read("/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
+                self.host = literal_eval(self.config["Server"]["host"])
+            except:
+                print('None settings file')
+                sys.exit()
+            
         self.port = literal_eval(self.config["Server"]["port"])
         self.log = literal_eval(self.config["Server"]["log"])
         self.logcmd = literal_eval(self.config["Server"]["logcmd"])
@@ -49,6 +57,8 @@ class MainRovPult:
             self.config["RovSettings"]["MotorPowerValue"])
         self.joystickrate = literal_eval(
             self.config["RovSettings"]["joystickrate"])
+        self.checkControllerPS4 = literal_eval(
+            self.config["RovSettings"]["ControllerPS4"])
 
         self.P = literal_eval(self.config["RovSettings"]["P"])
         self.I = literal_eval(self.config["RovSettings"]["I"])
@@ -60,8 +70,10 @@ class MainRovPult:
 
         if self.logcmd:
             self.variablePrint()
+        
+        self.CheckConfig = True
 
-    # вывод показаний конфигов
+    # вывод показаний конфигов (отладочная штука)
     def variablePrint(self):
         print('Start: ', self.startTime)
         print('host-', self.host)
@@ -79,6 +91,7 @@ class MainRovPult:
     def InitServer(self, *args):
         self.logger.WritelogSis('Init server')
         self.server = ServerMainPult(
+            self,
             log=self.log,
             logcmd=self.logcmd,
             host=self.host,
@@ -103,37 +116,57 @@ class MainRovPult:
                     target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
 
+    # инициализация джойстика ps4 
     def InitJoystick(self, *args):
         self.logger.WritelogSis('Init InitJoystick')
-        controller = MyController(
-            interface="/dev/input/js0", connecting_using_ds4drv=False)
+        controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
         controller.listen()
-        # TODO Сделать опрос джойстика и инициализацию обьекта класса джойстик
+        
 
+    # инициализация управления с помощью клавиатуры 
     def InitKeyboardPult(self, *args):
         self.logger.WritelogSis('Init KeyboardPult')
         self.keyboardPult = MyControllerKeyboard(self.server)
         self.keyboardPult.mainKeyboard()
+    
+    # инициализация оконного приложения (только в основном потоке!!!)
+    def InitApp(self):
+        self.logger.WritelogSis('Init APP')
+        self.APPGUI = APPGui()
+        self.APPGUI.main()
 
     # инициализация основного цикла
     def MAIN(self):
         self.logger.WritelogSis('Starting threading')
         self.mainserver = threading.Thread(
             target=self.InitServer, args=(self,))
+        
+        if self.checkControllerPS4:
+            self.mainJoistik = threading.Thread(
+                target=self.InitJoystick, args=(self,))
+        else:
+            self.logger.WritelogSis('None Joystick')
+            if self.logcmd:
+                print('Error none Joystick')
 
-        self.mainJoistik = threading.Thread(
-            target=self.InitJoystick, args=(self,))
 
         self.mainLogger = threading.Thread(
             target=self.InitLogger, args=(self,))
 
-        # self.mainKeyboard = threading.Thread(
-        #     target=self.InitKeyboardPult, args=(self,))
+        self.mainKeyboard = threading.Thread(
+            target=self.InitKeyboardPult, args=(self,))
 
         self.mainserver.start()
-        self.mainJoistik.start()
+        sleep(0.25) # тяжкая инициализация 
         self.mainLogger.start()
-        # self.mainKeyboard.start()
+        sleep(0.25)
+        self.mainKeyboard.start()
+        
+        if self.checkControllerPS4:
+            self.mainJoistik.start()
+        
+        self.InitApp()
+        
 
 
 class ServerMainPult:
@@ -148,8 +181,10 @@ class ServerMainPult:
 
     '''
 
-    def __init__(self, name=None, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01, startTime=None):
+    def __init__(self,main:MainRovPult, name=None, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01, startTime=None, check=False):
         # инициализация атрибутов
+        
+        
         self.HOST = host
         self.PORT = port
         self.JOYSTICKRATE = joystickrate
@@ -158,6 +193,7 @@ class ServerMainPult:
         self.logcmd = logcmd
         self.startTime = startTime
         self.checkConnect = False
+        self.main  = main 
 
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
@@ -779,11 +815,6 @@ class APPGui():  # класс описывающий работу приложе
         self.ui.setupUi(self.MainWindow)
 
     def main(self):
-        # проверка прогресс баров в отдельном потоке
-        # check = threading.Thread(
-        #     target=self.ui.checkprogress, args=(self.ui,))
-        # check.start()
-        # показ окна и обработка закрытия
         self.MainWindow.show()
         sys.exit(self.app.exec_())
 
