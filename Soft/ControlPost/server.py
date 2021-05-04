@@ -1,3 +1,9 @@
+'''
+внести обработку ошибочного пути 
+/home/proteus0/SoftProteus/Soft/ControlPost/log/input
+/home/proteus0/SoftProteus/Soft/ControlPost/log/output
+/home/proteus0/SoftProteus/Soft/ControlPost/log/sistem
+'''
 import socket  # модуль для взаимодействия по сети
 import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
