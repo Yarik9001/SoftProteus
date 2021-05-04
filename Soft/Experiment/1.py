@@ -145,58 +145,59 @@ if __name__ == '__main__':
 вниз - down down 
 отмена - up down 
 '''
-from keyboard import hook, wait, on_press_key, on_release_key
+# from keyboard import hook, wait, on_press_key, on_release_key
 
-class MyControllerKeyboard:
-    def __init__(self):
-        on_press_key('w', self.forward, suppress= False)
-        on_release_key('w',self.forward_release, suppress=False)
-        on_press_key('s', self.back, suppress=False)
-        on_release_key('s', self.down_relaese, suppress=False)
-        on_press_key('a', self.left, suppress=False)
-        on_release_key('a', self.left_relaese, suppress=False)
-        on_press_key('d', self.right, suppress=False)
-        on_release_key('d', self.right_relaese, suppress=False)
-        on_press_key('up', self.up, suppress=False)
-        on_release_key('up', self.up_relaese, suppress=False)
-        on_press_key('down', self.down, suppress=False)
-        on_release_key('down', self.down_relaese, suppress=False)
-        wait()
+# class MyControllerKeyboard:
+#     def __init__(self):
+#         on_press_key('w', self.forward, suppress= False)
+#         on_release_key('w',self.forward_release, suppress=False)
+#         on_press_key('s', self.back, suppress=False)
+#         on_release_key('s', self.down_relaese, suppress=False)
+#         on_press_key('a', self.left, suppress=False)
+#         on_release_key('a', self.left_relaese, suppress=False)
+#         on_press_key('d', self.right, suppress=False)
+#         on_release_key('d', self.right_relaese, suppress=False)
+#         on_press_key('up', self.up, suppress=False)
+#         on_release_key('up', self.up_relaese, suppress=False)
+#         on_press_key('down', self.down, suppress=False)
+#         on_release_key('down', self.down_relaese, suppress=False)
+#         wait()
         
-    def forward(self, key):
-        print('forward')
+#     def forward(self, key):
+#         print('forward')
         
-    def forward_release(self, key):
-        print('forward-stop')
+#     def forward_release(self, key):
+#         print('forward-stop')
         
-    def back(self, key):
-        print('back')
+#     def back(self, key):
+#         print('back')
         
-    def back_ralease(self, key):
-        print('back-relaese')
+#     def back_ralease(self, key):
+#         print('back-relaese')
     
-    def left(self, key):
-        print('left')
+#     def left(self, key):
+#         print('left')
         
-    def left_relaese(self, key):
-        print('left_relaese')
+#     def left_relaese(self, key):
+#         print('left_relaese')
         
-    def right(self, key):
-        print('right')
+#     def right(self, key):
+#         print('right')
         
-    def right_relaese(self, key):
-        print('right-relaese')
+#     def right_relaese(self, key):
+#         print('right-relaese')
         
-    def up(self, key):
-        print('up')
+#     def up(self, key):
+#         print('up')
     
-    def up_relaese(self, key):
-        print('up-relaese')
+#     def up_relaese(self, key):
+#         print('up-relaese')
         
-    def down(self, key):
-        print('down')
+#     def down(self, key):
+#         print('down')
         
-    def down_relaese(self, key):
-        print('down-relaese')
+#     def down_relaese(self, key):
+#         print('down-relaese')
         
-a = MyControllerKeyboard()
+# a = MyControllerKeyboard()
+
