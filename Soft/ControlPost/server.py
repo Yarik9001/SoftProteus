@@ -174,7 +174,6 @@ class MainRovPult:
         self.InitApp()
         
 
-
 class ServerMainPult:
     '''
     Класс описывающий систему бекенд пульта
