@@ -1,22 +1,31 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from keyboard import wait, on_release_key, on_press_key
+from pyPS4Controller.controller import Controller
 from threading import Thread
 from time import sleep
 import sys
+
+'''
+Данный скетч написан для отладки управления 
+'''
 
 class ServerMainPult:
     '''
     минимальная реализация сервера для отладки 
     DataOutput - славарик для отправки на аппарат 
     logcmd - флаг отвечающий за логирование в командную строку 
+    Матиматика считается при отправке на аппарат 
     '''
     def __init__(self):
         self.startTime = 0
         self.MotorPowerValue = 500
         self.logcmd = False
+        self.DataPult = {'j1-val-y':0, 'j1-val-x':0, 'j2-val-y':0, 'j2-val-x':0}
         self.DataOutput = {'time': self.startTime,  # Текущее время
                             'motorpowervalue': self.MotorPowerValue,  # мощность моторов
-                            'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
+                            'motor-1': 0, 'motor-2': 0,
+                            'motor-3': 0, 'motor-4': 0,
+                            'motor-5':0, 'motor-6': 0, # по идее мощность моторов
                             'led': False,  # управление светом
                             'manipul': 0,  # Управление манипулятором
                             'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
@@ -31,8 +40,8 @@ class MyThread(QtCore.QThread):
         
     def run(self):
         while True:
-            print(self.pult.DataOutput)
-            self.mysignal.emit(self.pult.DataOutput) # Передача данных из потока через сигнал
+            #print(self.pult.DataPult)
+            self.mysignal.emit(self.pult.DataPult) # Передача данных из потока через сигнал
             sleep(0.1)
 
 class Ui_MainWindow(object):
@@ -148,7 +157,7 @@ class Ui_MainWindow(object):
         
         
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(20, 270, 200, 14))
+        self.label.setGeometry(QtCore.QRect(20, 270, 250, 14))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label.setFont(font)
@@ -186,8 +195,12 @@ class Ui_MainWindow(object):
         Движение вниз - (5 вверх 6 вверх)
         Поворот направо 
         Поворот налево 
-        '''
         
+        ArrMotor[0] = J1_Val_Y + J1_Val_X + J2_Val_X;
+        ArrMotor[1] = J1_Val_Y - J1_Val_X - J2_Val_X;
+        ArrMotor[2] = -J1_Val_Y - J1_Val_X + J2_Val_X;
+        ArrMotor[3] = -J1_Val_Y + J1_Val_X - J2_Val_X;
+        '''
         def transformation(value:int):
             '''
             Функция перевода значений АЦП с джойстика в проценты, где 50 процентов
@@ -196,21 +209,64 @@ class Ui_MainWindow(object):
             value = (32768 - value) // 655
             return value
         
-        self.label.setText("Value: ")
+        def defense(value:int):
+            if value > 100:
+                value = 100
+            elif value < 0:
+                value = 0 
+            return value
         
-        self.progressBar.setValue()
-        self.progressBar_2.setValue()
-        # self.progressBar_3.setValue()
-        # self.progressBar_4.setValue()
-        self.progressBar_5.setValue()
-        self.progressBar_6.setValue()
-
+        
+        J1_Val_Y = transformation(data['j1-val-y'])
+        J1_Val_X = transformation(data['j1-val-x'])
+        J2_Val_Y = transformation(data['j2-val-y'])
+        J2_Val_X = transformation(data['j2-val-x'])
+        
+        motor1 = defense(J1_Val_Y + J1_Val_X + J2_Val_X - 100)
+        motor2 = defense(J1_Val_Y - J1_Val_X - J2_Val_X + 100)
+        motor3 = defense((-1 * J1_Val_Y) - J1_Val_X + J2_Val_X + 100)
+        motor4 = defense((-1 * J1_Val_Y) + J1_Val_X - J2_Val_X + 100)
+        motor5 = defense(J2_Val_Y)
+        motor6 = defense(J2_Val_Y)
+        
+        def debag(check:bool):
+            print(motor1)
+            print(motor2)
+            print(motor3)
+            print(motor4)
+            print('/////////')
+        
+        # debag(True)
+        
+        self.progressBar.setValue(motor1)
+        self.progressBar_2.setValue(motor2)
+        self.progressBar_3.setValue(motor3)
+        self.progressBar_4.setValue(motor4)
+        self.progressBar_5.setValue(motor5)
+        self.progressBar_6.setValue(motor6)
+        self.label.setText(f"Value: {motor1} {motor2} {motor3} {motor4} {motor5} {motor6}")
+        
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("Main", "Main"))
         MainWindow.setStyleSheet("background-color: rgb(66, 66, 66);")
         
+class MyController(Controller):
+    
+    def __init__(self, pultserver:ServerMainPult):
+        self.pultserver = pultserver
+        Controller.__init__(self,interface="/dev/input/js0", connecting_using_ds4drv=False)
+        
+    def connect(self):
+        print('hello world')
+    # any code you want to run during initial connection with the controller
 
+    def disconnect(self):
+        print('goodbay world')
+        # any code you want to run during loss of connection with the controller or keyboard interrupt
+        
+    def main(self):
+        self.listen(on_connect=self.connect, on_disconnect=self.disconnect)
 
 
 class MyControllerKeyboard:
@@ -249,82 +305,82 @@ class MyControllerKeyboard:
         wait()
 
     def forward(self, key):
-        self.pult.DataOutput['y'] = 32767
+        self.pult.DataPult['j1-val-y'] = 32767
         if self.pult.logcmd:
             print('forward')
 
     def forward_release(self, key):
-        self.pult.DataOutput['y'] = 0
+        self.pult.DataPult['j1-val-y'] = 0
         if self.pult.logcmd:
             print('forward-stop')
 
     def back(self, key):
-        self.pult.DataOutput['y'] = -32767
+        self.pult.DataPult['j1-val-y'] = -32767
         if self.pult.logcmd:
             print('back')
 
     def back_release(self, key):
-        self.pult.DataOutput['y'] = 0
+        self.pult.DataPult['j1-val-y'] = 0
         if self.pult.logcmd:
             print('back-relaese')
 
     def left(self, key):
-        self.pult.DataOutput['x'] = -32767
+        self.pult.DataPult['j1-val-x'] = -32767
         if self.pult.logcmd:
             print('left')
 
     def left_relaese(self, key):
-        self.pult.DataOutput['x'] = 0
+        self.pult.DataPult['j1-val-x'] = 0
         if self.pult.logcmd:
             print('left_relaese')
 
     def right(self, key):
-        self.pult.DataOutput['x'] = 32767
+        self.pult.DataPult['j1-val-x'] = 32767
         if self.pult.logcmd:
             print('right')
 
     def right_relaese(self, key):
-        self.pult.DataOutput['x'] = 0
+        self.pult.DataPult['j1-val-x'] = 0
         if self.pult.logcmd:
             print('right-relaese')
 
     def up(self, key):
-        self.pult.DataOutput['z'] = 32767
+        self.pult.DataPult['j2-val-y'] = 32767
         if self.pult.logcmd:
             print('up')
 
     def up_relaese(self, key):
-        self.pult.DataOutput['z'] = 0
+        self.pult.DataPult['j2-val-y'] = 0
         if self.pult.logcmd:
             print('up-relaese')
 
     def down(self, key):
-        self.pult.DataOutput['z'] = -32767
+        self.pult.DataPult['j2-val-y'] = -32767
         if self.pult.logcmd:
             print('down')
 
     def down_relaese(self, key):
-        self.pult.DataOutput['z'] = 0
+        self.pult.DataPult['j2-val-y'] = 0
         if self.pult.logcmd:
             print('down-relaese')
 
     def turn_left(self, key):
-        self.pult.DataOutput['r'] = -32767
+        self.pult.DataPult['j2-val-x'] = -32767
         if self.pult.logcmd:
             print('turn-left')
 
     def turn_left_relaese(self, key):
-        self.pult.DataOutput['r'] = 0
+        self.pult.DataPult['j2-val-x'] = 0
         if self.pult.logcmd:
             print('turn-stop')
 
     def turn_right(self, key):
-        self.pult.DataOutput['r'] = 32767
+        self.pult.DataPult['j2-val-x'] = 32767
         if self.pult.logcmd:
             print('turn-right')
 
     def turn_right_relaese(self, key):
-        self.pult.DataOutput['r'] = 0
+        self.pult.DataPult['j2-val-x'] = 0
         if self.pult.logcmd:
             print('turn-stop')
 
@@ -332,12 +388,19 @@ class MyControllerKeyboard:
 if __name__ == '__main__':
     servpass = ServerMainPult()
     keyboardPult = MyControllerKeyboard(servpass)
+    joystik = MyController(servpass)
     
+    def initJoystik():
+        joystik.main()
+        
     def InitKeyboardPult():
         keyboardPult.mainKeyboard()
             
     mainKeyboard = Thread(target=InitKeyboardPult)
     mainKeyboard.start()
+    
+    mainjoystik = Thread(target=initJoystik)
+    mainjoystik.start()
     
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
