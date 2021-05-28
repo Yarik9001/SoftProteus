@@ -8,7 +8,9 @@ import sys
 
 class MainRov:
     def __init__(self):
+        #  дефолтное время старта программы 
         self.startTime = str(datetime.now())
+        # чтение конфигов из файлика,  если файлик не найден то прорамма откажеться работать.
         self.config = ConfigParser()
         try:
             self.config.read("Soft\Apparatus\settings-rov.ini")
@@ -20,46 +22,37 @@ class MainRov:
             except:
                 print('None settings file')
                 sys.exit()
-        
+        # чтение конфигов отвечающих за клиентскую часть 
         self.port = literal_eval(self.config["Client"]["port"])
         self.log = literal_eval(self.config["Client"]["log"])
         self.logcmd = literal_eval(self.config["Client"]["logcmd"])
         self.ratelog = literal_eval(self.config['Client']['ratelog'])
+        self.ratesensor = literal_eval(self.config['Client']['ratesensor'])
         self.logOutput = literal_eval(self.config['Client']['logOutput'])
         self.logInput = literal_eval(self.config['Client']['logInput'])
-        
+        # чтение и здание дефолтного имени и дефолтного значения коофицента усилия на моторы 
         self.name = literal_eval(self.config["RovSettings"]["name"])
         self.motorpowervalue = literal_eval(
             self.config["RovSettings"]["MotorPowerValue"])
+        self.checkConnect = True
         
         
     def variablePrint(self):
-        print('Start: ', self.startTime)
-        print('host-', self.host)
-        print("port-", self.port)
-        print("log-", self.log)
-        print("logcmd-", self.logcmd)
-        print("Name-", self.name)
-        print("MotorValue-", self.motorpowervalue)
-        print("RateLog-", self.ratelog)
-        print('logInput-', self.logInput)
-        print('logOutput-', self.logOutput)
+        '''
+        Вывод всех атрибутов класса
+        '''
+        print('Start: ', self.startTime) # вывод стартового времени 
+        print('host-', self.host) # вывод хоста к которому будет подключаться аппарат
+        print("port-", self.port) # вывод порта для подключения и получения системной информации 
+        print("log-", self.log) # вывод флага логирования логируем\не логируем
+        print("logcmd-", self.logcmd) # выводим ли логи в консоль 
+        print("Name-", self.name) # вывод имени аппарата 
+        print("MotorValue-", self.motorpowervalue) # вывод коофицента мощности на моторах 
+        print("RateLog-", self.ratelog) # частота логировани 
+        print('logInput-', self.logInput) # логирование получаемой информации 
+        print('logOutput-', self.logOutput) # логирование отправляемой информации 
         
-    # инициализация сервера
-    def InitServer(self, *args):
-        self.logger.WritelogSis('Init server')
-        self.server = ServerMainPult(
-            self,
-            log=self.log,
-            logcmd=self.logcmd,
-            host=self.host,
-            port=self.port,
-            motorpowervalue=self.motorpowervalue,
-            joystickrate=self.joystickrate,
-            startTime=self.startTime
-        )
 
-        self.server.startservermain()   
         
         
 class LogerTXT:
@@ -111,7 +104,7 @@ class LogerTXT:
     # логирование принятой информации раз в секунду
     # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
     def WritelogInput(self, *args):
-        pult = self.rov.server
+        pult = self.rov
         print('logInput')
         while True:
             if pult.checkConnect:
@@ -150,46 +143,15 @@ class ROVProteusClient:
     '''
     Класс ответсвенный за связь с постом управления 
     '''
-    def __init__(self,main:MainRov):
+    def __init__(self, main:MainRov):
         self.rov = main
         self.HOST = main.host
         self.PORT = main.port
         self.logcmd = main.logcmd
-        self.ratesensor = main.r
-        self.rate = 1а
-
-        self.startclientmain()
+        self.checkConnect = True
+        self.ratesensor = main.ratesensor
         
-
-    def settingServer(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
-        self.client.connect((self.HOST, self.PORT))  # подключение адресс  порт
-        # обмен приветсвиями
-
-    
-    def startmultithreading(self):
-        # инициализауия потоков приема и передачи
-        dispatch = threading.Thread(
-            target=ROVProteus.CheckSensor, args=(self,))
-
-        receiver = threading.Thread(
-            target=ROVProteus.ReceivingCommands, args=(self,))
-
-        dispatch.start()
-        receiver.start()
-
-    def startclientmain(self):
-        # запуск бекенда сервера
-        self.settingServer()
-        self.startmultithreading()
-
-    def CheckSensor(self):
-        '''
-        Функция сбора данных с дачиков и отправки на пульт 
-        '''
-        while True:
-            timecontrol = str(datetime.now())
-            MassCheckSensor = {'time': timecontrol,
+        self.MassOut = {'time': main.startTime,
                                 'dept': 0,
                                 'm1': 0,'m2': 0, 'm3': 0,
                                 'm4': 0, 'm5': 0, 'm6': 0,
@@ -197,20 +159,57 @@ class ROVProteusClient:
                                 'error': None,
                                 'danger-error':False,
                                 'x':0, 'y':0,'z':0}
+        
+        self.MassInput =  {'time': main.startTime,  # Текущее время
+                            'motorpowervalue': 0.5,  # мощность моторов
+                            'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
+                            'led': False,  # управление светом
+                            'manipul': 0,  # Управление манипулятором
+                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
+                            'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
+                            }
+        
 
-            # TODO опрос датчиков тока, глубины, 
 
-            MassSensor = str(MassCheckSensor).encode("utf-8")
-            self.client.send(MassSensor)
+    def settingClient(self):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
+        self.client.connect((self.HOST, self.PORT))  # подключение адресс  порт
+        # обмен приветсвиями
+
+    
+    def startmultithreading(self):
+        # создние отдельных асинхронных потоков для отправки и приема 
+        dispatch = threading.Thread(
+            target= self.ClientDispatch, args=(self,))
+
+        receiver = threading.Thread(
+            target=self.ClientReceivin, args=(self,))
+
+        dispatch.start()
+        receiver.start()
+
+    def startclientmain(self):
+        # запуск бекенда сервера
+        self.settingClient()
+        self.startmultithreading()
+
+    def ClientDispatch(self):
+        '''
+        Функция для  отправки на пульт телеметрии
+        '''
+        while True:
+            self.MassOut['time'] = str(datetime.now())
+            DataOutput = str(self.MassOut).encode("utf-8")
+            self.client.send(DataOutput)
             sleep(self.ratesensor)
 
-    def ReceivingCommands(self):
+    def ClientReceivin(self):
         '''
         Прием информации 
         '''
         while True:
             data = self.client.recv(512).decode('utf-8')
-            # TODO считаем и отсылаем управляющие сигналы на моторы и прочую полезную нагрузку
+            self.MassInput = data
             if self.logcmd:
                 print(data)
             
