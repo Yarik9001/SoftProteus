@@ -7,7 +7,7 @@ import numpy
 import sys
 
 server_socket = socket.socket()
-server_socket.bind((sys.argv[1], int(sys.argv[2])))  
+server_socket.bind(('192.168.1.102', 9876))  
 server_socket.listen(0)
 print("Listening")
 connection = server_socket.accept()[0].makefile('rb')
@@ -24,7 +24,7 @@ try:
         im = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
         cv2.imshow('Video',im)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-           break
+            break
     cv2.destroyAllWindows()
 finally:
     connection.close()
