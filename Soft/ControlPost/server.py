@@ -4,9 +4,14 @@
 /home/proteus0/SoftProteus/Soft/ControlPost/log/output
 /home/proteus0/SoftProteus/Soft/ControlPost/log/sistem
 '''
-import socket  # модуль для взаимодействия по сети
+import socket
+import cv2
+import pickle
+import struct  # модуль для взаимодействия по сети
 import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
+import pyshine as ps
+import cv2
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from configparser import ConfigParser  # мудуль для работы с конфиг файлами
@@ -27,7 +32,7 @@ except:
         system('pip install keyboard')
     except:
         system('sudo pip install keyboard')
-        
+
 # часть связанная с графическим интерфейсом
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -36,21 +41,22 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class MainRovPult:
     def __init__(self):
         self.startTime = str(datetime.now())
-        
+
         # считывание конфиг файлов
         self.config = ConfigParser()
-        # костыльный способ обработки запуска в разных операционках 
+        # костыльный способ обработки запуска в разных операционках
         try:
             self.config.read("Soft\ControlPost\settings.ini")
             self.host = literal_eval(self.config["Server"]["host"])
         except:
             try:
-                self.config.read("/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
+                self.config.read(
+                    "/home/proteus0/SoftProteus/Soft/ControlPost/settings.ini")
                 self.host = literal_eval(self.config["Server"]["host"])
             except:
                 print('None settings file')
                 sys.exit()
-            
+
         self.port = literal_eval(self.config["Server"]["port"])
         self.log = literal_eval(self.config["Server"]["log"])
         self.logcmd = literal_eval(self.config["Server"]["logcmd"])
@@ -76,7 +82,7 @@ class MainRovPult:
 
         if self.logcmd:
             self.variablePrint()
-        
+
         self.CheckConfig = True
 
     # вывод показаний конфигов (отладочная штука)
@@ -122,19 +128,20 @@ class MainRovPult:
                     target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
 
-    # инициализация джойстика ps4 
+    # инициализация джойстика ps4
     def InitJoystick(self, *args):
         self.logger.WritelogSis('Init InitJoystick')
-        controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+        controller = MyController(
+            interface="/dev/input/js0", connecting_using_ds4drv=False)
         controller.listen()
-        
 
-    # инициализация управления с помощью клавиатуры 
+    # инициализация управления с помощью клавиатуры
+
     def InitKeyboardPult(self, *args):
         self.logger.WritelogSis('Init KeyboardPult')
         self.keyboardPult = MyControllerKeyboard(self.server)
         self.keyboardPult.mainKeyboard()
-    
+
     # инициализация оконного приложения (только в основном потоке!!!)
     def InitApp(self):
         self.logger.WritelogSis('Init APP')
@@ -146,7 +153,7 @@ class MainRovPult:
         self.logger.WritelogSis('Starting threading')
         self.mainserver = threading.Thread(
             target=self.InitServer, args=(self,))
-        
+
         if self.checkControllerPS4:
             self.mainJoistik = threading.Thread(
                 target=self.InitJoystick, args=(self,))
@@ -155,7 +162,6 @@ class MainRovPult:
             if self.logcmd:
                 print('Error none Joystick')
 
-
         self.mainLogger = threading.Thread(
             target=self.InitLogger, args=(self,))
 
@@ -163,16 +169,16 @@ class MainRovPult:
             target=self.InitKeyboardPult, args=(self,))
 
         self.mainserver.start()
-        sleep(0.25) # тяжкая инициализация 
+        sleep(0.25)  # тяжкая инициализация
         self.mainLogger.start()
         sleep(0.25)
         self.mainKeyboard.start()
-        
+
         if self.checkControllerPS4:
             self.mainJoistik.start()
-        
+
         self.InitApp()
-        
+
 
 class ServerMainPult:
     '''
@@ -186,10 +192,9 @@ class ServerMainPult:
 
     '''
 
-    def __init__(self,main:MainRovPult, name=None, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01, startTime=None, check=False):
+    def __init__(self, main: MainRovPult, name=None, log=True, logcmd=False, host=None, port=None, motorpowervalue=500, joystickrate=0.01, startTime=None, check=False):
         # инициализация атрибутов
-        
-        
+
         self.HOST = host
         self.PORT = port
         self.JOYSTICKRATE = joystickrate
@@ -198,17 +203,17 @@ class ServerMainPult:
         self.logcmd = logcmd
         self.startTime = startTime
         self.checkConnect = False
-        self.main  = main 
+        self.main = main
 
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
-                            'motorpowervalue': self.MotorPowerValue,  # мощность моторов
-                            'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
-                            'led': False,  # управление светом
-                            'manipul': 0,  # Управление манипулятором
-                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
-                            'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
-                            }
+                           'motorpowervalue': self.MotorPowerValue,  # мощность моторов
+                           'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
+                           'led': False,  # управление светом
+                           'manipul': 0,  # Управление манипулятором
+                           'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
+                           'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
+                           }
         self.DataInput = {
             'time': None,
             'dept': 0,
@@ -822,6 +827,60 @@ class APPGui():  # класс описывающий работу приложе
     def main(self):
         self.MainWindow.show()
         sys.exit(self.app.exec_())
+
+
+class SocketCamera:
+    def __init__(self):
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.host_name = socket.gethostname()
+        self.host_ip = '127.0.0.1'
+        print('HOST IP:', self.host_ip)
+        self.port = 9999
+        self.socket_address = (self.host_ip, self.port)
+        self.server_socket.bind(self.socket_address)
+        self.server_socket.listen()
+        print("Listening at", self.socket_address)
+
+    def show_client(self, addr, client_socket):
+        try:
+            print('CLIENT {} CONNECTED!'.format(addr))
+            if client_socket:  # if a client socket exists
+                data = b""
+                payload_size = struct.calcsize("Q")
+                while True:
+                    while len(data) < payload_size:
+                        packet = client_socket.recv(4*1024)  # 4K
+                        if not packet:
+                            break
+                        data += packet
+                    packed_msg_size = data[:payload_size]
+                    data = data[payload_size:]
+                    msg_size = struct.unpack("Q", packed_msg_size)[0]
+
+                    while len(data) < msg_size:
+                        data += client_socket.recv(4*1024)
+                    frame_data = data[:msg_size]
+                    data = data[msg_size:]
+                    frame = pickle.loads(frame_data)
+                    text = f"CLIENT: {addr}"
+                    frame = ps.putBText(frame, text, 10, 10, vspace=10, hspace=1, font_scale=0.7, 						background_RGB=(
+                        255, 0, 0), text_RGB=(255, 250, 250))
+                    cv2.imshow(f"FROM {addr}", frame)
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q'):
+                        break
+                client_socket.close()
+        except Exception as e:
+            print(f"CLINET {addr} DISCONNECTED")
+            pass
+    def mainCamera(self):
+        while True:
+            client_socket,addr = self.server_socket.accept()
+            thread = threading.Thread(target=self.show_client, args=(addr,client_socket))
+            thread.start()
+            print("TOTAL CLIENTS ",threading.activeCount() - 1)
+        
+        
 
 
 if __name__ == '__main__':  # основной запуск
