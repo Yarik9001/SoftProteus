@@ -829,11 +829,11 @@ class APPGui():  # класс описывающий работу приложе
         sys.exit(self.app.exec_())
 
 
-class SocketCamera:
+class SocketCameraInput:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host_name = socket.gethostname()
-        self.host_ip = '127.0.0.1'
+        self.host_ip = '192.168.1.102'
         print('HOST IP:', self.host_ip)
         self.port = 9999
         self.socket_address = (self.host_ip, self.port)
@@ -873,17 +873,20 @@ class SocketCamera:
         except Exception as e:
             print(f"CLINET {addr} DISCONNECTED")
             pass
+
     def mainCamera(self):
         while True:
-            client_socket,addr = self.server_socket.accept()
-            thread = threading.Thread(target=self.show_client, args=(addr,client_socket))
+            client_socket, addr = self.server_socket.accept()
+            thread = threading.Thread(
+                target=self.show_client, args=(addr, client_socket))
             thread.start()
-            print("TOTAL CLIENTS ",threading.activeCount() - 1)
-        
-        
+            print("TOTAL CLIENTS ", threading.activeCount() - 1)
+
 
 
 if __name__ == '__main__':  # основной запуск
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
-    Proteus = MainRovPult()
-    Proteus.MAIN()
+    # Proteus = MainRovPult()
+    # Proteus.MAIN()
+    a = SocketCameraInput()
+    a.mainCamera()

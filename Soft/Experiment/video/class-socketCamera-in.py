@@ -8,7 +8,7 @@ import imutils
 import cv2
 
 
-class SocketCameraOut:
+class SocketCameraInput:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host_name = socket.gethostname()
@@ -62,7 +62,7 @@ class SocketCameraOut:
             print("TOTAL CLIENTS ", threading.activeCount() - 1)
 
 
-class SocketCameraInput:
+class SocketCameraOut:
     def __init__(self):
         self.vid = cv2.VideoCapture(0)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

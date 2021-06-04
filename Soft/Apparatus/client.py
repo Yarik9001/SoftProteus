@@ -6,6 +6,12 @@ from configparser import ConfigParser # чтание конфигов
 from ast import literal_eval  # парсер для получаемых покетов 
 from adafruit_servokit import ServoKit # библиотека для работы с дрк и сервоприводами 
 import sys # системные штуки 
+import cv2
+import pickle
+import struct
+import pyshine as ps
+import imutils
+
 
 class MainRov:
     def __init__(self):
@@ -104,7 +110,7 @@ class MainRov:
         print("RateLog-", self.ratelog) # частота логировани 
         print('logInput-', self.logInput) # логирование получаемой информации 
         print('logOutput-', self.logOutput) # логирование отправляемой информации 
-        
+
 class LogerTXT:
     '''
     класс для логирования 
@@ -267,7 +273,7 @@ class DrkMotor:
     def main_motor(self):
         # TODO прописать систему взаимодействия с моторам (будет работать в отдельном потоке)
         pass 
-    
+
 class ROVProteusClient:
     '''
     Класс ответсвенный за связь с постом управления 
@@ -338,11 +344,35 @@ class ROVProteusClient:
             self.MassInput = data
             if self.logcmd:
                 print(data)
-            
-class FrontCAM:
+
+class SocketCameraOut:
     def __init__(self):
-        pass
-    # TODO реализовать опрос камер 
-    
-# if __name__ == '__main__':
-#     Proteus1 = ROVProteus()
+        self.vid = cv2.VideoCapture(0)
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.host_ip = '192.168.1.102'
+        self.port = 9999
+        self.client_socket.connect((self.host_ip, self.port))
+
+    def mainCameraIn(self):
+        if self.client_socket:
+            while (self.vid.isOpened()):
+                try:
+                    self.img, self.frame = self.vid.read()
+                    self.frame = imutils.resize(
+                        self.frame, width=640, height=480)
+                    self.a = pickle.dumps(self.frame)
+                    self.message = struct.pack("Q", len(self.a))+self.a
+                    self.client_socket.sendall(self.message)
+                    host_ip = self.host_ip
+                    cv2.imshow(f"TO: {host_ip}", self.frame)
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord("q"):
+                        self.client_socket.close()
+                except:
+                    print('VIDEO FINISHED!')
+                    break
+
+
+if __name__ == '__main__':
+    a = SocketCameraOut()
+    a.mainCameraIn()
