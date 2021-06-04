@@ -66,7 +66,7 @@ class SocketCameraInput:
     def __init__(self):
         self.vid = cv2.VideoCapture(0)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host_ip = '127.0.0.1'
+        self.host_ip = '192.168.1.102'
         self.port = 9999
         self.client_socket.connect((self.host_ip, self.port))
 

@@ -12,7 +12,7 @@ class SocketCameraOut:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host_name = socket.gethostname()
-        self.host_ip = '127.0.0.1'
+        self.host_ip = '192.168.1.102'
         print('HOST IP:', self.host_ip)
         self.port = 9999
         self.socket_address = (self.host_ip, self.port)
