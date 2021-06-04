@@ -1,8 +1,12 @@
-import socket, cv2, pickle, struct
+import socket
+import cv2
+import pickle
+import struct
 import threading
-import pyshine as ps 
+import pyshine as ps
 import imutils
 import cv2
+
 
 class SocketCameraOut:
     def __init__(self):
@@ -38,7 +42,7 @@ class SocketCameraOut:
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data)
                     text = f"CLIENT: {addr}"
-                    frame = ps.putBText(frame, text, 10, 10, vspace=10, hspace=1, font_scale=0.7, 						background_RGB=(
+                    frame = ps.putBText(frame, text, 10, 10, vspace=10, hspace=1, font_scale=0.7, background_RGB=(
                         255, 0, 0), text_RGB=(255, 250, 250))
                     cv2.imshow(f"FROM {addr}", frame)
                     key = cv2.waitKey(1) & 0xFF
@@ -48,35 +52,43 @@ class SocketCameraOut:
         except Exception as e:
             print(f"CLINET {addr} DISCONNECTED")
             pass
+
     def mainCamera(self):
         while True:
-            client_socket,addr = self.server_socket.accept()
-            thread = threading.Thread(target=self.show_client, args=(addr,client_socket))
+            client_socket, addr = self.server_socket.accept()
+            thread = threading.Thread(
+                target=self.show_client, args=(addr, client_socket))
             thread.start()
-            print("TOTAL CLIENTS ",threading.activeCount() - 1)
-            
+            print("TOTAL CLIENTS ", threading.activeCount() - 1)
+
+
 class SocketCameraInput:
     def __init__(self):
         self.vid = cv2.VideoCapture(0)
-        self.client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.host_ip = '127.0.0.1' 
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.host_ip = '127.0.0.1'
         self.port = 9999
-        self.client_socket.connect((self.host_ip,self.port))
-    
+        self.client_socket.connect((self.host_ip, self.port))
+
     def mainCameraIn(self):
-        if self.client_socket: 
+        if self.client_socket:
             while (self.vid.isOpened()):
                 try:
                     self.img, self.frame = self.vid.read()
-                    self.frame = imutils.resize(self.frame,width=380)
+                    self.frame = imutils.resize(self.frame, width=380)
                     self.a = pickle.dumps(self.frame)
-                    self.message = struct.pack("Q",len(self.a))+self.a
+                    self.message = struct.pack("Q", len(self.a))+self.a
                     self.client_socket.sendall(self.message)
                     host_ip = self.host_ip
-                    cv2.imshow(f"TO: {host_ip}",self.frame)
+                    cv2.imshow(f"TO: {host_ip}", self.frame)
                     key = cv2.waitKey(1) & 0xFF
                     if key == ord("q"):
                         self.client_socket.close()
                 except:
                     print('VIDEO FINISHED!')
                     break
+
+
+if __name__ == '__main__':
+    a = SocketCameraOut()
+    a.mainCamera()
