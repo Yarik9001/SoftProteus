@@ -849,7 +849,7 @@ class SocketCameraInput:
                 payload_size = struct.calcsize("Q")
                 while True:
                     while len(data) < payload_size:
-                        packet = client_socket.recv(4*1024)  # 4K
+                        packet = client_socket.recv(2048)  # 4K
                         if not packet:
                             break
                         data += packet
@@ -858,7 +858,7 @@ class SocketCameraInput:
                     msg_size = struct.unpack("Q", packed_msg_size)[0]
 
                     while len(data) < msg_size:
-                        data += client_socket.recv(4*1024)
+                        data += client_socket.recv(2048)
                     frame_data = data[:msg_size]
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data)
@@ -886,7 +886,7 @@ class SocketCameraInput:
 
 if __name__ == '__main__':  # основной запуск
     # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
-    # Proteus = MainRovPult()
-    # Proteus.MAIN()
-    a = SocketCameraInput()
-    a.mainCamera()
+    Proteus = MainRovPult()
+    Proteus.MAIN()
+    # a = SocketCameraInput()
+    # a.mainCamera()
