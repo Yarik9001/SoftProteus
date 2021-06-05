@@ -12,7 +12,7 @@ class SocketCameraInput:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host_name = socket.gethostname()
-        self.host_ip = '127.0.0.1'
+        self.host_ip = '192.168.1.102'
         print('HOST IP:', self.host_ip)
         self.port = 9999
         self.socket_address = (self.host_ip, self.port)
@@ -41,6 +41,7 @@ class SocketCameraInput:
                     frame_data = data[:msg_size]
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data)
+                    # frame = imutils.resize(frame, width=640)
                     text = f"CLIENT: {addr}"
                     frame = ps.putBText(frame, text, 10, 10, vspace=10, hspace=1, font_scale=0.7, 						background_RGB=(
                         255, 0, 0), text_RGB=(255, 250, 250))
@@ -92,4 +93,4 @@ class SocketCameraOut:
 
 if __name__ == '__main__':
     cam = SocketCameraInput()
-    cam.mainCameraIn()
+    cam.mainCamera()
