@@ -4,7 +4,7 @@ import zmq
 
 context = zmq.Context()
 socket = context.socket(zmq.PUB)
-socket.connect('tcp://localhost:7777')
+socket.connect('tcp://192.168.1.102:7777')
 
 camera = cv2.VideoCapture(0)
 
