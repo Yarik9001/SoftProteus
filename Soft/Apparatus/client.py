@@ -2,10 +2,6 @@ import socket  # библиотека для связи
 import threading  # библиотека для потоков
 import sys
 import cv2
-import pickle
-import struct
-import pyshine as ps
-import imutils
 import board
 import busio
 import base64
@@ -18,6 +14,11 @@ from datetime import datetime  # получение текущего време�
 from configparser import ConfigParser  # чтание конфигов
 from ast import literal_eval
 from mpu6050 import mpu6050
+
+# # import pickle
+# # import struct
+# import pyshine as ps
+# import imutils
 ############################################################################
 
 
@@ -40,6 +41,7 @@ class MainRov:
                 sys.exit()
         # чтение конфигов отвечающих за клиентскую часть
         self.port = literal_eval(self.config["Client"]["port"])
+        self.portcam = literal_eval(self.config["Client"]["portcam"])
         self.log = literal_eval(self.config["Client"]["log"])
         self.logcmd = literal_eval(self.config["Client"]["logcmd"])
         self.ratelog = literal_eval(self.config['Client']['ratelog'])
@@ -62,11 +64,22 @@ class MainRov:
         self.CheckConfig = True
 
     def InitClient(self, args):
-        self.logger.WritelogSis('Init server')
+        '''
+        Инициализация клиент серверной связи для управления и сбора телеметрии
+        '''
+        self.logger.WritelogSis('Init Client')
         self.client = ROVProteusClient(self)
         self.client.startclientmain()
+        
+    def InitCam(self, *args):
+        self.camera = SocketCameraOut()
+        self.logger.WritelogSis('Init Camera')
+        self.camera.mainCameraOut()
 
     def InitLogger(self, *args):
+        '''
+        Инициализация логирования 
+        '''
         if self.log and (self.logOutput or self.logInput):
             self.logger.WritelogSis('Init logger')
             if self.logInput:
@@ -79,36 +92,53 @@ class MainRov:
                 logout.start()
 
     def InitDRK(self, *args):
+        '''
+        Инициализация движителей 
+        '''
         self.logger.WritelogSis('Init DRK')
         self.drk = DrkMotor(self)
         self.drk.main_motor()
         
     def InitAmpermert(self,*args):
+        '''
+        Инициализация датчиков тока для отслеживания нагрузки на движители 
+        '''
         self.Amper = Amperemeter()
+        self.logger.WritelogSis('Init Ampermert')
         self.Amper.mainAmperemeter()
         
     def InitOrientation(self,*args):
+        '''
+        Инициализация сбора телеметрии о положении робота 
+        '''
         self.orientation = SensorOrientation()
+        self.logger.WritelogSis('Init Orientation')
         self.orientation.MainAccelerometer()
 
     def main(self):
+        '''
+        функция для запука всех систем аппарата, в нее необходимо добавлять инициализацию потоков и их запуск
+        '''
         self.logger.WritelogSis('Starting threading')
-
+        # создание потока для системной информации и телеметрии
         self.mainClient = threading.Thread(
             target=self.InitClient, args=(self,))
-
+        # создание потока для камеры 
+        self.mainCamera = threading.Thread(
+            target=self.InitCam, args=(self,))
+        # создание потока для логирования 
         self.mainlogger = threading.Thread(
             target=self.InitLogger, args=(self,))
-
+        # создание потока для управления движителями
         self.mainDrk = threading.Thread(
             target=self.InitDRK, args=(self,))
-        
+        # создание потока для сбора телеметрии с датчиков тока 
         self.mainAmpermetr = threading.Thread(
             target=self.InitAmpermert(), args=(self,))
-        
+        # создание потока для сбора показаний с датчиков ориентации 
         self.mainOrientations = threading.Thread(
             target=self.InitOrientation, args=(self,))
-
+        # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
         sleep(0.25)
         self.mainlogger.start()
@@ -125,19 +155,15 @@ class MainRov:
         Вывод всех атрибутов класса
         '''
         print('Start: ', self.startTime)  # вывод стартового времени
-        # вывод хоста к которому будет подключаться аппарат
-        print('host-', self.host)
-        # вывод порта для подключения и получения системной информации
-        print("port-", self.port)
+        print('host-', self.host)  # вывод хоста к которому будет подключаться аппарат
+        print("port-", self.port) # вывод порта для подключения и получения системной информации
         print("log-", self.log)  # вывод флага логирования логируем\не логируем
         print("logcmd-", self.logcmd)  # выводим ли логи в консоль
         print("Name-", self.name)  # вывод имени аппарата
-        # вывод коофицента мощности на моторах
-        print("MotorValue-", self.motorpowervalue)
+        print("MotorValue-", self.motorpowervalue) # вывод коофицента мощности на моторах
         print("RateLog-", self.ratelog)  # частота логировани
         print('logInput-', self.logInput)  # логирование получаемой информации
-        # логирование отправляемой информации
-        print('logOutput-', self.logOutput)
+        print('logOutput-', self.logOutput) # логирование отправляемой информации
 
 
 class LogerTXT:
@@ -227,6 +253,7 @@ class LogerTXT:
 class DrkMotor:
     def __init__(self, rov: MainRov):
         self.rov = rov
+        self.debag = True
 
         # инициализация моторов
         self.kit = ServoKit(channels=16)
@@ -249,13 +276,17 @@ class DrkMotor:
         print('init-motor')
 
     def initMotor(self):
+        '''
+        Функция для калибровки драйверов моторов
+        '''
         self.drk0.angle = 180
         self.drk1.angle = 180
         self.drk2.angle = 180
         self.drk3.angle = 180
         self.drk4.angle = 180
         self.drk5.angle = 180
-        print('motor max')
+        if self.rov.logcmd:
+            print('motor max')
         sleep(2)
         self.drk0.angle = 0
         self.drk1.angle = 0
@@ -263,7 +294,8 @@ class DrkMotor:
         self.drk3.angle = 0
         self.drk4.angle = 0
         self.drk5.angle = 0
-        print('motor min')
+        if self.rov.logcmd:
+            print('motor min')
         sleep(2)
         self.drk0.angle = 87
         self.drk1.angle = 87
@@ -271,11 +303,16 @@ class DrkMotor:
         self.drk3.angle = 87
         self.drk4.angle = 87
         self.drk5.angle = 87
-        print('motor center')
-        sleep(6)
-        print('motor good')
+        if self.rov.logcmd:
+            print('motor center')
+        sleep(3)
+        if self.rov.logcmd:
+            print('motor good')
 
     def test_motor_value(self):
+        '''
+        Функция для плавной проверки роботоспособности всех движителей 
+        '''
         for i in range(181):
             self.drk0.angle = i
             self.drk1.angle = i
@@ -283,7 +320,7 @@ class DrkMotor:
             self.drk3.angle = i
             self.drk4.angle = i
             self.drk5.angle = i
-            sleep(0.5)
+            sleep(0.25)
         for i in range(180, 0, -1):
             self.drk0.angle = i
             self.drk1.angle = i
@@ -291,7 +328,7 @@ class DrkMotor:
             self.drk3.angle = i
             self.drk4.angle = i
             self.drk5.angle = i
-            sleep(0.5)
+            sleep(0.25)
         for i in range(0, 88):
             self.drk0.angle = i
             self.drk1.angle = i
@@ -299,36 +336,46 @@ class DrkMotor:
             self.drk3.angle = i
             self.drk4.angle = i
             self.drk5.angle = i
-            sleep(0.5)
+            sleep(0.25)
 
     def main_motor(self):
+        '''
+        Основная функция которая опрашивает массив примимаемой информации и рапределяет нагрузку на движители 
+        '''
         while True:
+            # считывание принятых показаний с джойстика 
             J1_Val_Y = self.rov.client.MassInput["y"]
             J1_Val_X = self.J1_Val_Y = self.rov.client.MassInput["x"]
             J2_Val_X = self.J1_Val_Y = self.rov.client.MassInput["z"]
             J2_Val_Y = self.J1_Val_Y = self.rov.client.MassInput["r"]
-
+            # расчет нагрузки на каждый движитель 
             motor1 = J1_Val_Y + J1_Val_X + J2_Val_X 
             motor2 = J1_Val_Y - J1_Val_X - J2_Val_X 
             motor3 = (-1 * J1_Val_Y) - J1_Val_X + J2_Val_X 
             motor4 = (-1 * J1_Val_Y) + J1_Val_X - J2_Val_X 
             motor5 = J2_Val_Y
             motor6 = J2_Val_Y
-
+            # Преобразование рассчитанной нагрузки в градусы 
             motor1 = 90 - int(motor1 * 0.9)
             motor2 = 90 - int(motor2 * 0.9)
             motor3 = 90 - int(motor3 * 0.9)
             motor4 = 90 - int(motor4 * 0.9)
             motor5 = 90 - int(motor5 * 0.9)
             motor6 = 90 - int(motor6 * 0.9)
-
-            print(motor1, motor2, motor3, motor4, motor5, motor6)
-            self.drk0.angle = motor1
-            self.drk1.angle = motor2
-            self.drk2.angle = motor3
-            self.drk3.angle = motor4
-            self.drk4.angle = motor5
-            self.drk5.angle = motor6
+            
+            if self.rov.logcmd:
+                print(motor1, motor2, motor3, motor4, motor5, motor6)
+                
+            # отправка расчитанной нагрузки на движители
+            if not self.debag:
+                self.drk0.angle = motor1
+                self.drk1.angle = motor2
+                self.drk2.angle = motor3
+                self.drk3.angle = motor4
+                self.drk4.angle = motor5
+                self.drk5.angle = motor6
+            else:
+                print(motor1, motor2, motor3, motor4, motor5, motor6)
             sleep(0.1)
 
 
@@ -344,7 +391,7 @@ class ROVProteusClient:
         self.logcmd = main.logcmd
         self.checkConnect = True
         self.ratesensor = main.ratesensor
-
+        # массив отсылаемый с аппарата на пост управления 
         self.MassOut = {'time': main.startTime,
                         'dept': 0,
                         'a1': 0, 'a2': 0, 'a3': 0,
@@ -353,7 +400,7 @@ class ROVProteusClient:
                         'error': None,
                         'danger-error': False,
                         'x': 0, 'y': 0, 'z': 0}
-
+        # массив принимаемый с пота управления 
         self.MassInput = {'time': main.startTime,  # Текущее время
                           'motorpowervalue': 0.5,  # мощность моторов
                           'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
@@ -386,7 +433,7 @@ class ROVProteusClient:
 
     def ClientDispatch(self):
         '''
-        Функция для  отправки на пульт телеметрии
+        Функция для  отправки пакетов на пульт 
         '''
         while True:
             self.MassOut['time'] = str(datetime.now())
@@ -396,7 +443,7 @@ class ROVProteusClient:
 
     def ClientReceivin(self):
         '''
-        Прием информации 
+        Прием информации с поста управления 
         '''
         while True:
             data = self.client.recv(512).decode('utf-8')
@@ -406,17 +453,26 @@ class ROVProteusClient:
 
 
 class SocketCameraOut:
-    def __init__(self):
+    '''
+    Класс описывающий прием видео потока с камеры аппарата 
+    '''
+    def __init__(self, rov: MainRov):
+        self.rov = rov
+        # порт поста управления 
+        self.HOST = self.rov.host 
+        self.PORT = self.rov.portcam
+        self.ScreenResolution = ((640, 480))
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect('tcp://192.168.1.102:7777')
+        self.socket.connect((self.HOST, self.PORT))
         self.camera = cv2.VideoCapture(0)        
 
-    def mainCameraIn(self):
+    def mainCameraOut(self):
+        # отправка изображения на пост управления 
         while True:
             try:
                 self.ret, self.frame = self.camera.read()
-                self.frame = cv2.resize(self.frame, (640, 480))
+                self.frame = cv2.resize(self.frame, self.ScreenResolution)
                 self.encoded, self.buf = cv2.imencode('.jpg', self.frame)
                 self.image = base64.b64encode(self.buf)
                 self.socket.send(self.image)
@@ -428,12 +484,18 @@ class SocketCameraOut:
 
 class Amperemeter:
     def __init__(self, rov: MainRov):
+        '''
+        Класс описывающий взаимодействие и опрос датчиков тока 
+        '''
         self.rov = rov
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.ads13 = ADS.ADS1115(self.i2c)
         self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
 
     def mainAmperemeter(self):
+        '''
+        Функция опроса датчиков тока 
+        '''
         while True:
             a1 = AnalogIn(self.ads13, ADS.P0)
             a2 = AnalogIn(self.ads13, ADS.P1)
@@ -451,6 +513,9 @@ class Amperemeter:
 
 
 class SensorOrientation:
+    '''
+    Класс описывающий опрос датчиков положения x, y, z
+    '''
     def __init__(self, rov: MainRov):
         self.rov = rov
         self.sensor = mpu6050(0x68)

@@ -1,7 +1,7 @@
 import socket
 import cv2
-import pickle
-import struct  # модуль для взаимодействия по сети
+# import pickle
+# import struct  # модуль для взаимодействия по сети
 import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
 import pyshine as ps
