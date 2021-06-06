@@ -465,7 +465,5 @@ class SensorOrientation:
 
 
 if __name__ == '__main__':
-    # a = SocketCameraOut()
-    # a.mainCameraIn()
     rov = MainRov()
     rov.main()
