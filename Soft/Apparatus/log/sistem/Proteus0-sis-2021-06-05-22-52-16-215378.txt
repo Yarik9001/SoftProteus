@@ -1,0 +1,5 @@
+NameRov: Proteus0
+Time: 2021-06-05-22-52-16-215378
+2021-06-05 22:52:16.232878 - Start the MainRovPult
+2021-06-05 22:52:16.237862 - Init config
+2021-06-05 22:52:16.245843 - Starting threading

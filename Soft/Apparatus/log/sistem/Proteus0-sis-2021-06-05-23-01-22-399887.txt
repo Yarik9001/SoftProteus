@@ -1,0 +1,8 @@
+NameRov: Proteus0
+Time: 2021-06-05-23-01-22-399887
+2021-06-05 23:01:22.401851 - Start the MainRovPult
+2021-06-05 23:01:22.406840 - Init config
+2021-06-05 23:01:22.413821 - Starting threading
+2021-06-05 23:01:22.418806 - Init server
+2021-06-05 23:01:22.681858 - Init logger
+2021-06-05 23:01:22.932748 - Init DRK

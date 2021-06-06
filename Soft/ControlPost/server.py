@@ -12,6 +12,9 @@ import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
 import pyshine as ps
 import cv2
+import zmq
+import base64
+import numpy as np
 from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from configparser import ConfigParser  # мудуль для работы с конфиг файлами
@@ -204,11 +207,14 @@ class ServerMainPult:
         self.startTime = startTime
         self.checkConnect = False
         self.main = main
-
+        self.DataPult = {'j1-val-y': 0, 'j1-val-x': 0,
+                         'j2-val-y': 0, 'j2-val-x': 0}
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
                            'motorpowervalue': self.MotorPowerValue,  # мощность моторов
-                           'x': 0, 'y': 0, 'z': 0, 'r': 0,  # по идее мощность моторов
+                           'motor-1': 0, 'motor-2': 0,
+                           'motor-3': 0, 'motor-4': 0,
+                           'motor-5': 0, 'motor-6': 0,  # по идее мощность моторов
                            'led': False,  # управление светом
                            'manipul': 0,  # Управление манипулятором
                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
@@ -217,8 +223,8 @@ class ServerMainPult:
         self.DataInput = {
             'time': None,
             'dept': 0,
-            'm1': 0, 'm2': 0, 'm3': 0,
-            'm4': 0, 'm5': 0, 'm6': 0,
+            'a1': 0, 'a2': 0, 'a3': 0,
+            'a4': 0, 'a5': 0, 'a6': 0,
             'Volt': 0,
             'error': None,
             'danger-error': False,
@@ -320,81 +326,97 @@ class MyControllerKeyboard:
         wait()
 
     def forward(self, key):
-        self.pult.DataOutput['y'] = 32767
+        self.pult.DataPult['j1-val-y'] = 32767
+        self.pult.DataOutput['y'] = 100
         if self.pult.logcmd:
             print('forward')
 
     def forward_release(self, key):
+        self.pult.DataPult['j1-val-y'] = 0
         self.pult.DataOutput['y'] = 0
         if self.pult.logcmd:
             print('forward-stop')
 
     def back(self, key):
-        self.pult.DataOutput['y'] = -32767
+        self.pult.DataPult['j1-val-y'] = -32767
+        self.pult.DataOutput['y'] = -100
         if self.pult.logcmd:
             print('back')
 
     def back_release(self, key):
+        self.pult.DataPult['j1-val-y'] = 0
         self.pult.DataOutput['y'] = 0
         if self.pult.logcmd:
             print('back-relaese')
 
     def left(self, key):
-        self.pult.DataOutput['x'] = -32767
+        self.pult.DataPult['j1-val-x'] = -32767
+        self.pult.DataOutput['x'] = -100
         if self.pult.logcmd:
             print('left')
 
     def left_relaese(self, key):
+        self.pult.DataPult['j1-val-x'] = 0
         self.pult.DataOutput['x'] = 0
         if self.pult.logcmd:
             print('left_relaese')
 
     def right(self, key):
-        self.pult.DataOutput['x'] = 32767
+        self.pult.DataPult['j1-val-x'] = 32767
+        self.pult.DataOutput['x'] = 100
         if self.pult.logcmd:
             print('right')
 
     def right_relaese(self, key):
+        self.pult.DataPult['j1-val-x'] = 0
         self.pult.DataOutput['x'] = 0
         if self.pult.logcmd:
             print('right-relaese')
 
     def up(self, key):
-        self.pult.DataOutput['z'] = 32767
+        self.pult.DataPult['j2-val-y'] = 32767
+        self.pult.DataOutput['z'] = 100
         if self.pult.logcmd:
             print('up')
 
     def up_relaese(self, key):
-        self.pult.DataOutput['z'] = 0
+        self.pult.DataPult['j2-val-y'] = 0
+        self.pult.DataOutput['z'] = 100
         if self.pult.logcmd:
             print('up-relaese')
 
     def down(self, key):
-        self.pult.DataOutput['z'] = -32767
+        self.pult.DataPult['j2-val-y'] = -32767
+        self.pult.DataOutput['z'] = -100
         if self.pult.logcmd:
             print('down')
 
     def down_relaese(self, key):
+        self.pult.DataPult['j2-val-y'] = 0
         self.pult.DataOutput['z'] = 0
         if self.pult.logcmd:
             print('down-relaese')
 
     def turn_left(self, key):
-        self.pult.DataOutput['r'] = -32767
+        self.pult.DataPult['j2-val-x'] = -32767
+        self.pult.DataOutput['r'] = -100
         if self.pult.logcmd:
             print('turn-left')
 
     def turn_left_relaese(self, key):
+        self.pult.DataPult['j2-val-x'] = 0
         self.pult.DataOutput['r'] = 0
         if self.pult.logcmd:
             print('turn-stop')
 
     def turn_right(self, key):
-        self.pult.DataOutput['r'] = 32767
+        self.pult.DataPult['j2-val-x'] = 32767
+        self.pult.DataOutput['r'] = 100
         if self.pult.logcmd:
             print('turn-right')
 
     def turn_right_relaese(self, key):
+        self.pult.DataPult['j2-val-x'] = 0
         self.pult.DataOutput['r'] = 0
         if self.pult.logcmd:
             print('turn-stop')
@@ -550,7 +572,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_3.setProperty("value", 24)
-        self.progressBar_3.setTextVisible(False)
+        self.progressBar_3.setTextVisible(True)
         self.progressBar_3.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_3.setObjectName("progressBar_3")
         self.progressBar_4 = QtWidgets.QProgressBar(self.centralwidget)
@@ -565,7 +587,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_4.setProperty("value", 24)
-        self.progressBar_4.setTextVisible(False)
+        self.progressBar_4.setTextVisible(True)
         self.progressBar_4.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_4.setObjectName("progressBar_4")
         self.progressBar_5 = QtWidgets.QProgressBar(self.centralwidget)
@@ -580,7 +602,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_5.setProperty("value", 24)
-        self.progressBar_5.setTextVisible(False)
+        self.progressBar_5.setTextVisible(True)
         self.progressBar_5.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_5.setObjectName("progressBar_5")
         self.progressBar_6 = QtWidgets.QProgressBar(self.centralwidget)
@@ -595,7 +617,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_6.setProperty("value", 24)
-        self.progressBar_6.setTextVisible(False)
+        self.progressBar_6.setTextVisible(True)
         self.progressBar_6.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_6.setObjectName("progressBar_6")
         self.progressBar_7 = QtWidgets.QProgressBar(self.centralwidget)
@@ -610,7 +632,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_7.setProperty("value", 24)
-        self.progressBar_7.setTextVisible(False)
+        self.progressBar_7.setTextVisible(True)
         self.progressBar_7.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_7.setObjectName("progressBar_7")
         self.progressBar_8 = QtWidgets.QProgressBar(self.centralwidget)
@@ -625,7 +647,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_8.setProperty("value", 24)
-        self.progressBar_8.setTextVisible(False)
+        self.progressBar_8.setTextVisible(True)
         self.progressBar_8.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_8.setObjectName("progressBar_8")
         self.progressBar_9 = QtWidgets.QProgressBar(self.centralwidget)
@@ -640,7 +662,7 @@ class Ui_MainWindow(object):
                                          "    border-radius: 3px\n"
                                          "}")
         self.progressBar_9.setProperty("value", 24)
-        self.progressBar_9.setTextVisible(False)
+        self.progressBar_9.setTextVisible(True)
         self.progressBar_9.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_9.setObjectName("progressBar_9")
         self.progressBar_10 = QtWidgets.QProgressBar(self.centralwidget)
@@ -655,7 +677,7 @@ class Ui_MainWindow(object):
                                           "    border-radius: 3px\n"
                                           "}")
         self.progressBar_10.setProperty("value", 24)
-        self.progressBar_10.setTextVisible(False)
+        self.progressBar_10.setTextVisible(True)
         self.progressBar_10.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_10.setObjectName("progressBar_10")
         self.progressBar_11 = QtWidgets.QProgressBar(self.centralwidget)
@@ -672,7 +694,7 @@ class Ui_MainWindow(object):
                                           "    border-radius: 3px\n"
                                           "}")
         self.progressBar_11.setProperty("value", 24)
-        self.progressBar_11.setTextVisible(False)
+        self.progressBar_11.setTextVisible(True)
         self.progressBar_11.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_11.setObjectName("progressBar_11")
         self.progressBar_12 = QtWidgets.QProgressBar(self.centralwidget)
@@ -687,7 +709,7 @@ class Ui_MainWindow(object):
                                           "    border-radius: 3px\n"
                                           "}")
         self.progressBar_12.setProperty("value", 24)
-        self.progressBar_12.setTextVisible(False)
+        self.progressBar_12.setTextVisible(True)
         self.progressBar_12.setOrientation(QtCore.Qt.Vertical)
         self.progressBar_12.setObjectName("progressBar_12")
         self.dial = QtWidgets.QDial(self.centralwidget)
@@ -815,6 +837,70 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "TextLabel"))
         self.label_11.setText(_translate("MainWindow", "None"))
         self.label_12.setText(_translate("MainWindow", "Volt:"))
+        
+    def on_started(self): # Вызывается при запуске потока
+        print('start thread')
+
+    def on_change(self, data):
+        '''
+        Движение вперед - (1 вперед 2 вперед 3 назад 4 назад) 
+        Движение назад - (1 назад 2 назад 3 вперед 4 вперед)
+        Движение лагом вправо - (1 назад 2 вперед 3 вперед 4 назад)
+        Движение лагом влево - (1 вперед 2 назад 3 назад 4 вперед)
+        Движение вверх - (5 вниз 6 вниз)
+        Движение вниз - (5 вверх 6 вверх)
+        Поворот направо 
+        Поворот налево 
+        
+        ArrMotor[0] = J1_Val_Y + J1_Val_X + J2_Val_X;
+        ArrMotor[1] = J1_Val_Y - J1_Val_X - J2_Val_X;
+        ArrMotor[2] = -J1_Val_Y - J1_Val_X + J2_Val_X;
+        ArrMotor[3] = -J1_Val_Y + J1_Val_X - J2_Val_X;
+        '''
+        def transformation(value:int):
+            '''
+            Функция перевода значений АЦП с джойстика в проценты, где 50 процентов
+            дефолтное значение
+            '''
+            value = (32768 - value) // 655
+            return value
+        
+        def defense(value:int):
+            if value > 100:
+                value = 100
+            elif value < 0:
+                value = 0 
+            return value
+        
+        
+        J1_Val_Y = transformation(data['j1-val-y'])
+        J1_Val_X = transformation(data['j1-val-x'])
+        J2_Val_Y = transformation(data['j2-val-y'])
+        J2_Val_X = transformation(data['j2-val-x'])
+        
+        motor1 = defense(J1_Val_Y + J1_Val_X + J2_Val_X - 100)
+        motor2 = defense(J1_Val_Y - J1_Val_X - J2_Val_X + 100)
+        motor3 = defense((-1 * J1_Val_Y) - J1_Val_X + J2_Val_X + 100)
+        motor4 = defense((-1 * J1_Val_Y) + J1_Val_X - J2_Val_X + 100)
+        motor5 = defense(J2_Val_Y)
+        motor6 = defense(J2_Val_Y)
+        
+        def debag(check:bool):
+            print(motor1)
+            print(motor2)
+            print(motor3)
+            print(motor4)
+            print('/////////')
+        
+        # debag(True)
+        
+        self.progressBar.setValue(motor1)
+        self.progressBar_2.setValue(motor2)
+        self.progressBar_3.setValue(motor3)
+        self.progressBar_4.setValue(motor4)
+        self.progressBar_5.setValue(motor5)
+        self.progressBar_6.setValue(motor6)
+        self.label.setText(f"Value: {motor1} {motor2} {motor3} {motor4} {motor5} {motor6}")
 
 
 class APPGui():  # класс описывающий работу приложение
@@ -829,64 +915,42 @@ class APPGui():  # класс описывающий работу приложе
         sys.exit(self.app.exec_())
 
 
+class MyThread(QtCore.QThread):
+    mysignal = QtCore.pyqtSignal(dict)
+
+    def __init__(self, pult: ServerMainPult, parent=None):
+        self.pult = pult
+        QtCore.QThread.__init__(self, parent)
+
+    def run(self):
+        while True:
+            # print(self.pult.DataPult)
+            # Передача данных из потока через сигнал
+            self.mysignal.emit(self.pult.DataPult)
+            sleep(0.1)
+
+
 class SocketCameraInput:
     def __init__(self):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host_name = socket.gethostname()
-        self.host_ip = '192.168.1.102'
-        print('HOST IP:', self.host_ip)
-        self.port = 9999
-        self.socket_address = (self.host_ip, self.port)
-        self.server_socket.bind(self.socket_address)
-        self.server_socket.listen()
-        print("Listening at", self.socket_address)
-
-    def show_client(self, addr, client_socket):
-        try:
-            print('CLIENT {} CONNECTED!'.format(addr))
-            if client_socket:  # if a client socket exists
-                data = b""
-                payload_size = struct.calcsize("Q")
-                while True:
-                    while len(data) < payload_size:
-                        packet = client_socket.recv(2048)  # 4K
-                        if not packet:
-                            break
-                        data += packet
-                    packed_msg_size = data[:payload_size]
-                    data = data[payload_size:]
-                    msg_size = struct.unpack("Q", packed_msg_size)[0]
-
-                    while len(data) < msg_size:
-                        data += client_socket.recv(2048)
-                    frame_data = data[:msg_size]
-                    data = data[msg_size:]
-                    frame = pickle.loads(frame_data)
-                    text = f"CLIENT: {addr}"
-                    frame = ps.putBText(frame, text, 10, 10, vspace=10, hspace=1, font_scale=0.7, 						background_RGB=(
-                        255, 0, 0), text_RGB=(255, 250, 250))
-                    cv2.imshow(f"FROM {addr}", frame)
-                    key = cv2.waitKey(1) & 0xFF
-                    if key == ord('q'):
-                        break
-                client_socket.close()
-        except Exception as e:
-            print(f"CLINET {addr} DISCONNECTED")
-            pass
-
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.SUB)
+        self.socket.bind('tcp://192.168.1.102:7777')
+        self.socket.setsockopt_string(zmq.SUBSCRIBE, np.unicode(''))
+        
     def mainCamera(self):
         while True:
-            client_socket, addr = self.server_socket.accept()
-            thread = threading.Thread(
-                target=self.show_client, args=(addr, client_socket))
-            thread.start()
-            print("TOTAL CLIENTS ", threading.activeCount() - 1)
+            try:
+                image_string = socket.recv_string()
+                raw_image = base64.b64decode(image_string)
+                image = np.frombuffer(raw_image, dtype=np.uint8)
+                self.frame = cv2.imdecode(image, 1)
+                cv2.imshow("frame", self.frame)
+                cv2.waitKey(1)
+            except KeyboardInterrupt:
+                cv2.destroyAllWindows()
+                break
 
 
-
-if __name__ == '__main__':  # основной запуск
-    # Proteus = ServerMainPult(log=True, logcmd=True) # вызов сервера
+if __name__ == '__main__':
     Proteus = MainRovPult()
     Proteus.MAIN()
-    # a = SocketCameraInput()
-    # a.mainCamera()

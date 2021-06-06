@@ -1,17 +1,24 @@
 import socket  # библиотека для связи
 import threading  # библиотека для потоков
-from time import sleep  # библиотека длязадержек
-from datetime import datetime  # получение текущего времени
-from configparser import ConfigParser  # чтание конфигов
-from ast import literal_eval  # парсер для получаемых покетов
-# библиотека для работы с дрк и сервоприводами
-from adafruit_servokit import ServoKit
-import sys  # системные штуки
+import sys
 import cv2
 import pickle
 import struct
 import pyshine as ps
 import imutils
+import board
+import busio
+import base64
+import zmq
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+from adafruit_servokit import ServoKit
+from time import sleep  # библиотека длязадержек
+from datetime import datetime  # получение текущего времени
+from configparser import ConfigParser  # чтание конфигов
+from ast import literal_eval
+from mpu6050 import mpu6050
+############################################################################
 
 
 class MainRov:
@@ -71,10 +78,18 @@ class MainRov:
                     target=self.logger.WritelogOutput, args=(self.logger,))
                 logout.start()
 
-    def InitDRK(self, args):
+    def InitDRK(self, *args):
         self.logger.WritelogSis('Init DRK')
         self.drk = DrkMotor(self)
         self.drk.main_motor()
+        
+    def InitAmpermert(self,*args):
+        self.Amper = Amperemeter()
+        self.Amper.mainAmperemeter()
+        
+    def InitOrientation(self,*args):
+        self.orientation = SensorOrientation()
+        self.orientation.MainAccelerometer()
 
     def main(self):
         self.logger.WritelogSis('Starting threading')
@@ -86,7 +101,13 @@ class MainRov:
             target=self.InitLogger, args=(self,))
 
         self.mainDrk = threading.Thread(
-            target=self.InitDrk, args=(self,))
+            target=self.InitDRK, args=(self,))
+        
+        self.mainAmpermetr = threading.Thread(
+            target=self.InitAmpermert(), args=(self,))
+        
+        self.mainOrientations = threading.Thread(
+            target=self.InitOrientation, args=(self,))
 
         self.mainClient.start()
         sleep(0.25)
@@ -94,6 +115,10 @@ class MainRov:
         sleep(0.25)
         self.mainDrk.start()
         sleep(0.25)
+        self.mainAmpermetr.start()
+        sleep(0.25)
+        self.mainOrientations.start()
+        
 
     def variablePrint(self):
         '''
@@ -278,21 +303,34 @@ class DrkMotor:
 
     def main_motor(self):
         while True:
-            m1 = self.rov.client.MassOut['m1']
-            m2 = self.rov.client.MassOut['m2']
-            m3 = self.rov.client.MassOut['m3']
-            m4 = self.rov.client.MassOut['m4']
-            m5 = self.rov.client.MassOut['m5']
-            m6 = self.rov.client.MassOut['m6']
-            print(m1, m2, m3, m4, m5, m6)
-            self.drk0.angle = m1 * 1.8
-            self.drk1.angle = m2 * 1.8
-            self.drk2.angle = m3 * 1.8
-            self.drk3.angle = m4 * 1.8
-            self.drk4.angle = m5 * 1.8
-            self.drk5.angle = m6 * 1.8
+            J1_Val_Y = self.rov.client.MassInput["y"]
+            J1_Val_X = self.J1_Val_Y = self.rov.client.MassInput["x"]
+            J2_Val_X = self.J1_Val_Y = self.rov.client.MassInput["z"]
+            J2_Val_Y = self.J1_Val_Y = self.rov.client.MassInput["r"]
+
+            motor1 = J1_Val_Y + J1_Val_X + J2_Val_X 
+            motor2 = J1_Val_Y - J1_Val_X - J2_Val_X 
+            motor3 = (-1 * J1_Val_Y) - J1_Val_X + J2_Val_X 
+            motor4 = (-1 * J1_Val_Y) + J1_Val_X - J2_Val_X 
+            motor5 = J2_Val_Y
+            motor6 = J2_Val_Y
+
+            motor1 = 90 - int(motor1 * 0.9)
+            motor2 = 90 - int(motor2 * 0.9)
+            motor3 = 90 - int(motor3 * 0.9)
+            motor4 = 90 - int(motor4 * 0.9)
+            motor5 = 90 - int(motor5 * 0.9)
+            motor6 = 90 - int(motor6 * 0.9)
+
+            print(motor1, motor2, motor3, motor4, motor5, motor6)
+            self.drk0.angle = motor1
+            self.drk1.angle = motor2
+            self.drk2.angle = motor3
+            self.drk3.angle = motor4
+            self.drk4.angle = motor5
+            self.drk5.angle = motor6
             sleep(0.1)
-    
+
 
 class ROVProteusClient:
     '''
@@ -309,8 +347,8 @@ class ROVProteusClient:
 
         self.MassOut = {'time': main.startTime,
                         'dept': 0,
-                        'm1': 0, 'm2': 0, 'm3': 0,
-                        'm4': 0, 'm5': 0, 'm6': 0,
+                        'a1': 0, 'a2': 0, 'a3': 0,
+                        'a4': 0, 'a5': 0, 'a6': 0,
                         'Volt': 0,
                         'error': None,
                         'danger-error': False,
@@ -362,39 +400,72 @@ class ROVProteusClient:
         '''
         while True:
             data = self.client.recv(512).decode('utf-8')
-            self.MassInput = data
+            self.MassInput = dict(literal_eval(str(data)))
             if self.logcmd:
                 print(data)
 
 
 class SocketCameraOut:
     def __init__(self):
-        self.vid = cv2.VideoCapture(0)
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host_ip = '192.168.1.102'
-        self.port = 9999
-        self.client_socket.connect((self.host_ip, self.port))
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUB)
+        self.socket.connect('tcp://192.168.1.102:7777')
+        self.camera = cv2.VideoCapture(0)        
 
     def mainCameraIn(self):
-        if self.client_socket:
-            while (self.vid.isOpened()):
-                try:
-                    self.img, self.frame = self.vid.read()
-                    self.frame = imutils.resize(
-                        self.frame, width=640, height=480)
-                    self.a = pickle.dumps(self.frame)
-                    self.message = struct.pack("Q", len(self.a))+self.a
-                    self.client_socket.sendall(self.message)
-                    host_ip = self.host_ip
-                    cv2.imshow(f"TO: {host_ip}", self.frame)
-                    key = cv2.waitKey(1) & 0xFF
-                    if key == ord("q"):
-                        self.client_socket.close()
-                except:
-                    print('VIDEO FINISHED!')
-                    break
+        while True:
+            try:
+                self.ret, self.frame = self.camera.read()
+                self.frame = cv2.resize(self.frame, (640, 480))
+                self.encoded, self.buf = cv2.imencode('.jpg', self.frame)
+                self.image = base64.b64encode(self.buf)
+                self.socket.send(self.image)
+            except KeyboardInterrupt:
+                self.camera.release()
+                cv2.destroyAllWindows()
+                break
+
+
+class Amperemeter:
+    def __init__(self, rov: MainRov):
+        self.rov = rov
+        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.ads13 = ADS.ADS1115(self.i2c)
+        self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
+
+    def mainAmperemeter(self):
+        while True:
+            a1 = AnalogIn(self.ads13, ADS.P0)
+            a2 = AnalogIn(self.ads13, ADS.P1)
+            a3 = AnalogIn(self.ads13, ADS.P2)
+            a4 = AnalogIn(self.adc46, ADS.P0)
+            a5 = AnalogIn(self.adc46, ADS.P1)
+            a6 = AnalogIn(self.adc46, ADS.P2)
+            self.rov.client.MassOut['a1'] = a1.value
+            self.rov.client.MassOut['a2'] = a2.value
+            self.rov.client.MassOut['a3'] = a3.value
+            self.rov.client.MassOut['a4'] = a4.value
+            self.rov.client.MassOut['a5'] = a5.value
+            self.rov.client.MassOut['a6'] = a6.value
+            sleep(0.1)
+
+
+class SensorOrientation:
+    def __init__(self, rov: MainRov):
+        self.rov = rov
+        self.sensor = mpu6050(0x68)
+
+    def MainAccelerometer(self):
+        while True:
+            accelerometer_data = sensor.get_accel_data()
+            self.rov.client.MassOut['x'] = accelerometer_data['x']
+            self.rov.client.MassOut['y'] = accelerometer_data['y']
+            self.rov.client.MassOut['z'] = accelerometer_data['z']
+            sleep(0.1)
 
 
 if __name__ == '__main__':
-    a = SocketCameraOut()
-    a.mainCameraIn()
+    # a = SocketCameraOut()
+    # a.mainCameraIn()
+    rov = MainRov()
+    rov.main()
