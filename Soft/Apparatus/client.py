@@ -6,14 +6,14 @@ import board
 import busio
 import base64
 import zmq
-import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+# import adafruit_ads1x15.ads1115 as ADS
+# from adafruit_ads1x15.analog_in import AnalogIn
 from adafruit_servokit import ServoKit
 from time import sleep  # библиотека длязадержек
 from datetime import datetime  # получение текущего времени
 from configparser import ConfigParser  # чтание конфигов
 from ast import literal_eval
-from mpu6050 import mpu6050
+# from mpu6050 import mpu6050
 
 # # import pickle
 # # import struct
@@ -72,7 +72,7 @@ class MainRov:
         self.client.startclientmain()
         
     def InitCam(self, *args):
-        self.camera = SocketCameraOut()
+        self.camera = SocketCameraOut(self)
         self.logger.WritelogSis('Init Camera')
         self.camera.mainCameraOut()
 
@@ -99,21 +99,21 @@ class MainRov:
         self.drk = DrkMotor(self)
         self.drk.main_motor()
         
-    def InitAmpermert(self,*args):
-        '''
-        Инициализация датчиков тока для отслеживания нагрузки на движители 
-        '''
-        self.Amper = Amperemeter()
-        self.logger.WritelogSis('Init Ampermert')
-        self.Amper.mainAmperemeter()
+    # def InitAmpermert(self,*args):
+    #     '''
+    #     Инициализация датчиков тока для отслеживания нагрузки на движители 
+    #     '''
+    #     self.Amper = Amperemeter()
+    #     self.logger.WritelogSis('Init Ampermert')
+    #     self.Amper.mainAmperemeter()
         
-    def InitOrientation(self,*args):
-        '''
-        Инициализация сбора телеметрии о положении робота 
-        '''
-        self.orientation = SensorOrientation()
-        self.logger.WritelogSis('Init Orientation')
-        self.orientation.MainAccelerometer()
+    # def InitOrientation(self,*args):
+    #     '''
+    #     Инициализация сбора телеметрии о положении робота 
+    #     '''
+    #     self.orientation = SensorOrientation()
+    #     self.logger.WritelogSis('Init Orientation')
+    #     self.orientation.MainAccelerometer()
 
     def main(self):
         '''
@@ -133,11 +133,11 @@ class MainRov:
         self.mainDrk = threading.Thread(
             target=self.InitDRK, args=(self,))
         # создание потока для сбора телеметрии с датчиков тока 
-        self.mainAmpermetr = threading.Thread(
-            target=self.InitAmpermert(), args=(self,))
-        # создание потока для сбора показаний с датчиков ориентации 
-        self.mainOrientations = threading.Thread(
-            target=self.InitOrientation, args=(self,))
+        # self.mainAmpermetr = threading.Thread(
+        #     target=self.InitAmpermert(), args=(self,))
+        # # создание потока для сбора показаний с датчиков ориентации 
+        # self.mainOrientations = threading.Thread(
+        #     target=self.InitOrientation, args=(self,))
         # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
         sleep(0.25)
@@ -145,9 +145,9 @@ class MainRov:
         sleep(0.25)
         self.mainDrk.start()
         sleep(0.25)
-        self.mainAmpermetr.start()
-        sleep(0.25)
-        self.mainOrientations.start()
+        # self.mainAmpermetr.start()
+        # sleep(0.25)
+        # self.mainOrientations.start()
         
 
     def variablePrint(self):
@@ -482,51 +482,51 @@ class SocketCameraOut:
                 break
 
 
-class Amperemeter:
-    def __init__(self, rov: MainRov):
-        '''
-        Класс описывающий взаимодействие и опрос датчиков тока 
-        '''
-        self.rov = rov
-        self.i2c = busio.I2C(board.SCL, board.SDA)
-        self.ads13 = ADS.ADS1115(self.i2c)
-        self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
+# class Amperemeter:
+#     def __init__(self, rov: MainRov):
+#         '''
+#         Класс описывающий взаимодействие и опрос датчиков тока 
+#         '''
+#         self.rov = rov
+#         self.i2c = busio.I2C(board.SCL, board.SDA)
+#         self.ads13 = ADS.ADS1115(self.i2c)
+#         self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
 
-    def mainAmperemeter(self):
-        '''
-        Функция опроса датчиков тока 
-        '''
-        while True:
-            a1 = AnalogIn(self.ads13, ADS.P0)
-            a2 = AnalogIn(self.ads13, ADS.P1)
-            a3 = AnalogIn(self.ads13, ADS.P2)
-            a4 = AnalogIn(self.adc46, ADS.P0)
-            a5 = AnalogIn(self.adc46, ADS.P1)
-            a6 = AnalogIn(self.adc46, ADS.P2)
-            self.rov.client.MassOut['a1'] = a1.value
-            self.rov.client.MassOut['a2'] = a2.value
-            self.rov.client.MassOut['a3'] = a3.value
-            self.rov.client.MassOut['a4'] = a4.value
-            self.rov.client.MassOut['a5'] = a5.value
-            self.rov.client.MassOut['a6'] = a6.value
-            sleep(0.1)
+#     def mainAmperemeter(self):
+#         '''
+#         Функция опроса датчиков тока 
+#         '''
+#         while True:
+#             a1 = AnalogIn(self.ads13, ADS.P0)
+#             a2 = AnalogIn(self.ads13, ADS.P1)
+#             a3 = AnalogIn(self.ads13, ADS.P2)
+#             a4 = AnalogIn(self.adc46, ADS.P0)
+#             a5 = AnalogIn(self.adc46, ADS.P1)
+#             a6 = AnalogIn(self.adc46, ADS.P2)
+#             self.rov.client.MassOut['a1'] = a1.value
+#             self.rov.client.MassOut['a2'] = a2.value
+#             self.rov.client.MassOut['a3'] = a3.value
+#             self.rov.client.MassOut['a4'] = a4.value
+#             self.rov.client.MassOut['a5'] = a5.value
+#             self.rov.client.MassOut['a6'] = a6.value
+#             sleep(0.1)
 
 
-class SensorOrientation:
-    '''
-    Класс описывающий опрос датчиков положения x, y, z
-    '''
-    def __init__(self, rov: MainRov):
-        self.rov = rov
-        self.sensor = mpu6050(0x68)
+# class SensorOrientation:
+#     '''
+#     Класс описывающий опрос датчиков положения x, y, z
+#     '''
+#     def __init__(self, rov: MainRov):
+#         self.rov = rov
+#         self.sensor = mpu6050(0x68)
 
-    def MainAccelerometer(self):
-        while True:
-            accelerometer_data = sensor.get_accel_data()
-            self.rov.client.MassOut['x'] = accelerometer_data['x']
-            self.rov.client.MassOut['y'] = accelerometer_data['y']
-            self.rov.client.MassOut['z'] = accelerometer_data['z']
-            sleep(0.1)
+#     def MainAccelerometer(self):
+#         while True:
+#             accelerometer_data = sensor.get_accel_data()
+#             self.rov.client.MassOut['x'] = accelerometer_data['x']
+#             self.rov.client.MassOut['y'] = accelerometer_data['y']
+#             self.rov.client.MassOut['z'] = accelerometer_data['z']
+#             sleep(0.1)
 
 
 if __name__ == '__main__':
