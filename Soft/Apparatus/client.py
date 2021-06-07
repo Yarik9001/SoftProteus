@@ -427,7 +427,7 @@ class ROVProteusClient:
         self.settingClient()
         self.startmultithreading()
 
-    def ClientDispatch(self):
+    def ClientDispatch(self, *args):
         '''
         Функция для  отправки пакетов на пульт 
         '''
@@ -446,6 +446,7 @@ class ROVProteusClient:
             self.MassInput = dict(literal_eval(str(data)))
             if self.logcmd:
                 print(data)
+
 
 
 class SocketCameraOut:
