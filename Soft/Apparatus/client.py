@@ -422,7 +422,7 @@ class ROVProteusClient:
         dispatch.start()
         receiver.start()
 
-    def startclientmain(self):
+    def startclientmain(self, *args):
         # запуск бекенда сервера
         self.settingClient()
         self.startmultithreading()
@@ -437,7 +437,7 @@ class ROVProteusClient:
             self.client.send(DataOutput)
             sleep(self.ratesensor)
 
-    def ClientReceivin(self):
+    def ClientReceivin(self, *args):
         '''
         Прием информации с поста управления 
         '''
