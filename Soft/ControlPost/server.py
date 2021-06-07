@@ -144,6 +144,11 @@ class MainRovPult:
         self.logger.WritelogSis('Init APP')
         self.APPGUI = APPGui()
         self.APPGUI.main()
+    
+    def InitCamIn(self, *args):
+        self.CamIn = SocketCameraInput(self)
+        self.logger.WritelogSis('Init CameraIn')
+        self.CamIn.mainCamera()
 
     # инициализация основного цикла
     def MAIN(self):
@@ -164,13 +169,18 @@ class MainRovPult:
 
         self.mainKeyboard = threading.Thread(
             target=self.InitKeyboardPult, args=(self,))
+        
+        self.mainCamIn = threading.Thread(
+            target=self.InitCamIn, args=(self,))
 
         self.mainserver.start()
         sleep(0.25)  # тяжкая инициализация
         self.mainLogger.start()
         sleep(0.25)
         self.mainKeyboard.start()
-
+        sleep(0.25)
+        self.mainCamIn.start()
+        sleep(0.25)
         if self.checkControllerPS4:
             self.mainJoistik.start()
 
