@@ -29,7 +29,7 @@ class MainRov:
         # чтение конфигов из файлика,  если файлик не найден то прорамма откажеться работать.
         self.config = ConfigParser()
         try:
-            self.config.read("/home/pi/SoftProteus/Soft/Apparatus/settings-rov.ini")
+            self.config.read("/home/pi/Desktop/SoftProteus/Soft/Apparatus/settings-rov.ini")
             self.host = literal_eval(self.config["Client"]["host"])
         except:
             try:
@@ -250,7 +250,7 @@ class DrkMotor:
         self.rov = rov
         self.debag = False
         self.pwmMin = 1100
-        self.pwmMax = 2000
+        self.pwmMax = 1800
         
         # инициализация моторов
         self.kit = ServoKit(channels=16)
