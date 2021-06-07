@@ -222,11 +222,6 @@ class LogerTXT:
                 self.fileInput = open(self.namefileInput, "a+")
                 inf = str(pult.MassInput)
                 self.fileInput.write(inf+'\n')
-                # Запись ошибок
-                if pult.MassInput['error'] != None:
-                    errorinf = pult.MassInput['error']
-                    self.fileInput.write('ERROR :' + errorinf + '\n')
-
                 sleep(self.ratelog)
                 self.fileInput.close()
 
