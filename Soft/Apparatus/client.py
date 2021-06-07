@@ -465,7 +465,7 @@ class SocketCameraOut:
         self.ScreenResolution = ((640, 480))
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect((self.HOST, self.PORT))
+        self.socket.connect('tcp://192.168.1.102:7777')
         self.camera = cv2.VideoCapture(0)        
 
     def mainCameraOut(self):
