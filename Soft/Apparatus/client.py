@@ -250,7 +250,7 @@ class DrkMotor:
         self.rov = rov
         self.debag = False
         self.pwmMin = 1000
-        self.pwmMax = 1900
+        self.pwmMax = 1950
         
         # инициализация моторов
         self.kit = ServoKit(channels=16)
