@@ -248,7 +248,7 @@ class LogerTXT:
 class DrkMotor:
     def __init__(self, rov: MainRov):
         self.rov = rov
-        self.debag = True
+        self.debag = False
 
         # инициализация моторов
         self.kit = ServoKit(channels=16)

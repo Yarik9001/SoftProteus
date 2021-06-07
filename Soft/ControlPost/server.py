@@ -206,9 +206,7 @@ class ServerMainPult:
         # словарик для отправки на аппарат
         self.DataOutput = {'time': self.startTime,  # Текущее время
                            'motorpowervalue': self.MotorPowerValue,  # мощность моторов
-                           'motor-1': 0, 'motor-2': 0,
-                           'motor-3': 0, 'motor-4': 0,
-                           'motor-5': 0, 'motor-6': 0,  # по идее мощность моторов
+                           'x': 0, 'y': 0, 'z': 0, 'r': 0,# по идее мощность моторов
                            'led': False,  # управление светом
                            'manipul': 0,  # Управление манипулятором
                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
