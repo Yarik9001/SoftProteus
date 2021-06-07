@@ -933,16 +933,17 @@ class MyThread(QtCore.QThread):
 
 
 class SocketCameraInput:
-    def __init__(self):
+    def __init__(self, rov:MainRovPult):
+        self.rov = rov
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.bind('tcp://192.168.1.102:7777')
+        self.socket.bind("tcp://192.168.1.102:7777")
         self.socket.setsockopt_string(zmq.SUBSCRIBE, np.unicode(''))
         
     def mainCamera(self):
         while True:
             try:
-                image_string = socket.recv_string()
+                image_string = self.socket.recv_string()
                 raw_image = base64.b64decode(image_string)
                 image = np.frombuffer(raw_image, dtype=np.uint8)
                 self.frame = cv2.imdecode(image, 1)
