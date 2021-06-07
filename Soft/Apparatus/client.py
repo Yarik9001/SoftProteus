@@ -215,7 +215,7 @@ class LogerTXT:
     # логирование принятой информации раз в секунду
     # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
     def WritelogInput(self, *args):
-        pult = self.rov
+        pult = self.rov.client
         print('logInput')
         while True:
             if pult.checkConnect:
@@ -224,7 +224,7 @@ class LogerTXT:
                 self.fileInput.write(inf+'\n')
                 # Запись ошибок
                 if pult.DataInput['error'] != None:
-                    errorinf = pult.DataInput['error']
+                    errorinf = pult.MassInput['error']
                     self.fileInput.write('ERROR :' + errorinf + '\n')
 
                 sleep(self.ratelog)
@@ -232,12 +232,12 @@ class LogerTXT:
 
     # паралельное логирование отсылаемой информации
     def WritelogOutput(self, *args):
-        pult = self.rov.server
+        pult = self.rov.client
         print('logWrite')
         while True:
             if pult.checkConnect:
                 self.fileOutput = open(self.namefileOutput, "a+")
-                inf = str(pult.DataOutput)
+                inf = str(pult.MassOutput)
                 self.fileOutput.write(inf+'\n')
                 self.fileOutput.close()
                 sleep(self.ratelog)
