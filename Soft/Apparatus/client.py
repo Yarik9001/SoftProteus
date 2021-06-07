@@ -249,8 +249,8 @@ class DrkMotor:
     def __init__(self, rov: MainRov):
         self.rov = rov
         self.debag = False
-        self.pwmMin = 1100
-        self.pwmMax = 1800
+        self.pwmMin = 1000
+        self.pwmMax = 1900
         
         # инициализация моторов
         self.kit = ServoKit(channels=16)
