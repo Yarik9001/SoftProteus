@@ -370,7 +370,8 @@ class DrkMotor:
                 self.drk4.angle = motor5
                 self.drk5.angle = motor6
             else:
-                print(motor1, motor2, motor3, motor4, motor5, motor6)
+                #print(motor1, motor2, motor3, motor4, motor5, motor6)
+                print(self.rov.client.MassInput)
             sleep(0.1)
 
 
