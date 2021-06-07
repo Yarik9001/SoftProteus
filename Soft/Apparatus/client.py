@@ -249,22 +249,24 @@ class DrkMotor:
     def __init__(self, rov: MainRov):
         self.rov = rov
         self.debag = False
-
+        self.pwmMin = 1100
+        self.pwmMax = 2000
+        
         # инициализация моторов
         self.kit = ServoKit(channels=16)
 
         self.drk0 = self.kit.servo[0]
-        self.drk0.set_pulse_width_range(1100, 1900)
+        self.drk0.set_pulse_width_range(self.pwmMin, self.pwmMax)
         self.drk1 = self.kit.servo[1]
-        self.drk1.set_pulse_width_range(1100, 1900)
+        self.drk1.set_pulse_width_range(self.pwmMin, self.pwmMax)
         self.drk2 = self.kit.servo[2]
-        self.drk2.set_pulse_width_range(1100, 1900)
+        self.drk2.set_pulse_width_range(self.pwmMin, self.pwmMax)
         self.drk3 = self.kit.servo[3]
-        self.drk3.set_pulse_width_range(1100, 1900)
+        self.drk3.set_pulse_width_range(self.pwmMin, self.pwmMax)
         self.drk4 = self.kit.servo[4]
-        self.drk4.set_pulse_width_range(1000, 1900)
+        self.drk4.set_pulse_width_range(self.pwmMin, self.pwmMax)
         self.drk5 = self.kit.servo[5]
-        self.drk5.set_pulse_width_range(1000, 1900)
+        self.drk5.set_pulse_width_range(self.pwmMin, self.pwmMax)
 
         self.initMotor()
 
