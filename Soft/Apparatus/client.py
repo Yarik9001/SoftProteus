@@ -29,7 +29,7 @@ class MainRov:
         # чтение конфигов из файлика,  если файлик не найден то прорамма откажеться работать.
         self.config = ConfigParser()
         try:
-            self.config.read("Soft\Apparatus\settings-rov.ini")
+            self.config.read("/home/pi/SoftProteus/Soft/Apparatus/settings-rov.ini")
             self.host = literal_eval(self.config["Client"]["host"])
         except:
             try:
@@ -220,10 +220,10 @@ class LogerTXT:
         while True:
             if pult.checkConnect:
                 self.fileInput = open(self.namefileInput, "a+")
-                inf = str(pult.DataInput)
+                inf = str(pult.MassInput)
                 self.fileInput.write(inf+'\n')
                 # Запись ошибок
-                if pult.DataInput['error'] != None:
+                if pult.MassInput['error'] != None:
                     errorinf = pult.MassInput['error']
                     self.fileInput.write('ERROR :' + errorinf + '\n')
 
@@ -237,7 +237,7 @@ class LogerTXT:
         while True:
             if pult.checkConnect:
                 self.fileOutput = open(self.namefileOutput, "a+")
-                inf = str(pult.MassOutput)
+                inf = str(pult.MassOut)
                 self.fileOutput.write(inf+'\n')
                 self.fileOutput.close()
                 sleep(self.ratelog)
