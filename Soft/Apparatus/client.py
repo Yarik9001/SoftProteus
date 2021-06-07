@@ -145,6 +145,8 @@ class MainRov:
         sleep(0.25)
         self.mainDrk.start()
         sleep(0.25)
+        self.mainCamera.start()
+        sleep(0.25)
         # self.mainAmpermetr.start()
         # sleep(0.25)
         # self.mainOrientations.start()
