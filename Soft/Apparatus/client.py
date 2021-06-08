@@ -104,7 +104,7 @@ class MainRov:
         '''
         Инициализация датчиков тока для отслеживания нагрузки на движители 
         '''
-        self.Amper = Amperemeter()
+        self.Amper = Amperemeter(self)
         self.logger.WritelogSis('Init Ampermetr')
         self.Amper.mainAmperemeter()
         
@@ -112,7 +112,7 @@ class MainRov:
         '''
         Инициализация сбора телеметрии о положении робота 
         '''
-        self.orientation = SensorOrientation()
+        self.orientation = SensorOrientation(self)
         self.logger.WritelogSis('Init Orientation')
         self.orientation.MainAccelerometer()
 
