@@ -92,13 +92,13 @@ class MainRov:
         self.drk = DrkMotor(self)
         self.drk.main_motor()
         
-    # def InitAmpermert(self,*args):
-    #     '''
-    #     Инициализация датчиков тока для отслеживания нагрузки на движители 
-    #     '''
-    #     self.Amper = Amperemeter()
-    #     self.logger.WritelogSis('Init Ampermert')
-    #     self.Amper.mainAmperemeter()
+    def InitAmpermert(self,*args):
+        '''
+        Инициализация датчиков тока для отслеживания нагрузки на движители 
+        '''
+        self.Amper = Amperemeter(self)
+        self.logger.WritelogSis('Init Ampermert')
+        self.Amper.mainAmperemeter()
         
     def InitOrientation(self,*args):
         '''
@@ -126,8 +126,8 @@ class MainRov:
         self.mainDrk = threading.Thread(
             target=self.InitDRK, args=(self,))
         # создание потока для сбора телеметрии с датчиков тока 
-        # self.mainAmpermetr = threading.Thread(
-        #     target=self.InitAmpermert(), args=(self,))
+        self.mainAmpermetr = threading.Thread(
+            target=self.InitAmpermert(), args=(self,))
         # # создание потока для сбора показаний с датчиков ориентации 
         self.mainOrientations = threading.Thread(
             target=self.InitOrientation, args=(self,))
