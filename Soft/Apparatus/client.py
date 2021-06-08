@@ -104,7 +104,7 @@ class MainRov:
         '''
         Инициализация сбора телеметрии о положении робота 
         '''
-        self.orientation = SensorOrientation()
+        self.orientation = SensorOrientation(self)
         self.logger.WritelogSis('Init Orientation')
         self.orientation.MainAccelerometer()
 

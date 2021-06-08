@@ -412,7 +412,7 @@ class MyControllerKeyboard:
             print('turn-stop')
 
     def turn_right(self, key):
-        self.pult.DataPult['j2-val-x'] = 32767r
+        self.pult.DataPult['j2-val-x'] = 32767
         self.pult.DataOutput['r'] = 100
         if self.pult.logcmd:
             print('turn-right')
