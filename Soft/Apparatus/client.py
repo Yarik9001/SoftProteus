@@ -428,6 +428,7 @@ class ROVProteusClient:
         Функция для  отправки пакетов на пульт 
         '''
         while True:
+            print(self.MassOut)
             self.MassOut['time'] = str(datetime.now())
             DataOutput = str(self.MassOut).encode("utf-8")
             self.client.send(DataOutput)
@@ -519,7 +520,7 @@ class SensorOrientation:
             self.rov.client.MassOut['y'] = self.mpu.acceleration[1]
             self.rov.client.MassOut['z'] = self.mpu.acceleration[2]
             self.rov.client.MassOut['temp'] = self.mpu.temperature
-            print(self.rov.client.MassOut)
+            # print(self.rov.client.MassOut)
             sleep(0.1)
 
 if __name__ == '__main__':
