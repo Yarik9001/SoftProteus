@@ -355,8 +355,8 @@ class DrkMotor:
             motor5 = 90 - int(motor5 * 0.9)
             motor6 = 90 - int(motor6 * 0.9)
             
-            if self.rov.logcmd:
-                print(motor1, motor2, motor3, motor4, motor5, motor6)
+            # if self.rov.logcmd:
+            #     print(motor1, motor2, motor3, motor4, motor5, motor6)
                 
             # отправка расчитанной нагрузки на движители
             if not self.debag:
@@ -519,6 +519,7 @@ class SensorOrientation:
             self.rov.client.MassOut['y'] = self.mpu.acceleration[1]
             self.rov.client.MassOut['z'] = self.mpu.acceleration[2]
             self.rov.client.MassOut['temp'] = self.mpu.temperature
+            print(self.rov.client.MassOut)
             sleep(0.1)
 
 if __name__ == '__main__':
