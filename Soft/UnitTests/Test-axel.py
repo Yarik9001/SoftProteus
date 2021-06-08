@@ -11,3 +11,7 @@ while True:
     print("Temperature: %.2f C" % mpu.temperature)
     print("")
     time.sleep(1)
+    print('#########################')
+    print(type(mpu.acceleration))
+    print(type(mpu.gyro))
+    print(type(mpu.temperature))

@@ -6,23 +6,24 @@ import board
 import busio
 import base64
 import zmq
-# import adafruit_ads1x15.ads1115 as ADS
-# from adafruit_ads1x15.analog_in import AnalogIn
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 from adafruit_servokit import ServoKit
 from time import sleep  # библиотека длязадержек
 from datetime import datetime  # получение текущего времени
 from configparser import ConfigParser  # чтание конфигов
 from ast import literal_eval
-# from mpu6050 import mpu6050
+from adafruit_mpu6050 import MPU6050
 
-# # import pickle
-# # import struct
-# import pyshine as ps
-# import imutils
-############################################################################
 
 
 class MainRov:
+    '''
+    Класс описывающий основную логику работы и запускаюющий отдельные потоки для выполнения задач, в 
+    атрибутах класса хрняться все конфигурационны параметры считываемые с конфиг файла. Чтобы добавить 
+    новый поток необходимо прописать функцию вида Init******* в которой находиться инициализация экземпляра класса,
+    после чего необходимо запустить новую функцию в методе main.
+    '''
     def __init__(self):
         #  дефолтное время старта программы
         self.startTime = str(datetime.now())
@@ -99,21 +100,21 @@ class MainRov:
         self.drk = DrkMotor(self)
         self.drk.main_motor()
         
-    # def InitAmpermert(self,*args):
-    #     '''
-    #     Инициализация датчиков тока для отслеживания нагрузки на движители 
-    #     '''
-    #     self.Amper = Amperemeter()
-    #     self.logger.WritelogSis('Init Ampermert')
-    #     self.Amper.mainAmperemeter()
+    def InitAmpermert(self,*args):
+        '''
+        Инициализация датчиков тока для отслеживания нагрузки на движители 
+        '''
+        self.Amper = Amperemeter()
+        self.logger.WritelogSis('Init Ampermetr')
+        self.Amper.mainAmperemeter()
         
-    # def InitOrientation(self,*args):
-    #     '''
-    #     Инициализация сбора телеметрии о положении робота 
-    #     '''
-    #     self.orientation = SensorOrientation()
-    #     self.logger.WritelogSis('Init Orientation')
-    #     self.orientation.MainAccelerometer()
+    def InitOrientation(self,*args):
+        '''
+        Инициализация сбора телеметрии о положении робота 
+        '''
+        self.orientation = SensorOrientation()
+        self.logger.WritelogSis('Init Orientation')
+        self.orientation.MainAccelerometer()
 
     def main(self):
         '''
@@ -133,11 +134,11 @@ class MainRov:
         self.mainDrk = threading.Thread(
             target=self.InitDRK, args=(self,))
         # создание потока для сбора телеметрии с датчиков тока 
-        # self.mainAmpermetr = threading.Thread(
-        #     target=self.InitAmpermert(), args=(self,))
-        # # создание потока для сбора показаний с датчиков ориентации 
-        # self.mainOrientations = threading.Thread(
-        #     target=self.InitOrientation, args=(self,))
+        self.mainAmpermetr = threading.Thread(
+            target=self.InitAmpermert(), args=(self,))
+        # создание потока для сбора показаний с датчиков ориентации 
+        self.mainOrientations = threading.Thread(
+            target=self.InitOrientation, args=(self,))
         # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
         sleep(0.25)
@@ -147,11 +148,10 @@ class MainRov:
         sleep(0.25)
         self.mainCamera.start()
         sleep(0.25)
-        # self.mainAmpermetr.start()
-        # sleep(0.25)
-        # self.mainOrientations.start()
+        self.mainAmpermetr.start()
+        sleep(0.25)
+        self.mainOrientations.start()
         
-
     def variablePrint(self):
         '''
         Вывод всех атрибутов класса
@@ -214,11 +214,14 @@ class LogerTXT:
         self.fileOutput.close()
         self.fileSis.close()
 
-    # логирование принятой информации раз в секунду
-    # TODO переписать для того чтобы логер брал все из обьекта rov, а не тягал из сервера.
+
     def WritelogInput(self, *args):
+        '''
+        Метод отвечающий за логирование принятой информации 
+        '''
         pult = self.rov.client
-        print('logInput')
+        if self.rov.logcmd:
+            print('logInput start')
         while True:
             if pult.checkConnect:
                 self.fileInput = open(self.namefileInput, "a+")
@@ -227,10 +230,14 @@ class LogerTXT:
                 sleep(self.ratelog)
                 self.fileInput.close()
 
-    # паралельное логирование отсылаемой информации
+
     def WritelogOutput(self, *args):
+        '''
+        Метод отвечающий за логирование отсылаемой информации 
+        '''
         pult = self.rov.client
-        print('logWrite')
+        if self.rov.logcmd:
+            print('logWrite start')
         while True:
             if pult.checkConnect:
                 self.fileOutput = open(self.namefileOutput, "a+")
@@ -239,8 +246,11 @@ class LogerTXT:
                 self.fileOutput.close()
                 sleep(self.ratelog)
 
-    # запись системных логов
+
     def WritelogSis(self, text):
+        '''
+        Метод отвечающий за логирование системных логов 
+        '''
         timelog = str(datetime.now())
         self.fileSis = open(self.namefileSistem, 'a+')
         self.fileSis.write(timelog + ' - ' + text + '\n')
@@ -396,7 +406,7 @@ class ROVProteusClient:
                         'dept': 0,
                         'a1': 0, 'a2': 0, 'a3': 0,
                         'a4': 0, 'a5': 0, 'a6': 0,
-                        'Volt': 0,
+                        'Volt': 0, 'temp': 0,
                         'error': None,
                         'danger-error': False,
                         'x': 0, 'y': 0, 'z': 0}
@@ -450,7 +460,6 @@ class ROVProteusClient:
             self.MassInput = dict(literal_eval(str(data)))
             if self.logcmd:
                 print(data)
-
 
 
 class SocketCameraOut:
@@ -513,21 +522,22 @@ class Amperemeter:
             sleep(0.1)
 
 
-# class SensorOrientation:
-#     '''
-#     Класс описывающий опрос датчиков положения x, y, z
-#     '''
-#     def __init__(self, rov: MainRov):
-#         self.rov = rov
-#         self.sensor = mpu6050(0x68)
+class SensorOrientation:
+    '''
+    Класс описывающий опрос акселерометра по осям x, y, z, а так же датчика температуры
+    '''
+    def __init__(self, rov: MainRov):
+        self.rov = rov
+        self.i2c = board.I2C()  
+        self.mpu = MPU6050(self.i2c)
 
-#     def MainAccelerometer(self):
-#         while True:
-#             accelerometer_data = sensor.get_accel_data()
-#             self.rov.client.MassOut['x'] = accelerometer_data['x']
-#             self.rov.client.MassOut['y'] = accelerometer_data['y']
-#             self.rov.client.MassOut['z'] = accelerometer_data['z']
-#             sleep(0.1)
+    def MainAccelerometer(self):
+        while True:
+            self.rov.client.MassOut['x'] = self.mpu.acceleration[0]
+            self.rov.client.MassOut['y'] = self.mpu.acceleration[1]
+            self.rov.client.MassOut['z'] = self.mpu.acceleration[2]
+            self.rov.client.MassOut['temp'] = self.mpu.temperature[0]
+            sleep(0.1)
 
 
 if __name__ == '__main__':
