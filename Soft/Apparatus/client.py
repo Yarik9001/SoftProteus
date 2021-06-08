@@ -100,13 +100,13 @@ class MainRov:
     #     self.logger.WritelogSis('Init Ampermert')
     #     self.Amper.mainAmperemeter()
         
-    # def InitOrientation(self,*args):
-    #     '''
-    #     Инициализация сбора телеметрии о положении робота 
-    #     '''
-    #     self.orientation = SensorOrientation()
-    #     self.logger.WritelogSis('Init Orientation')
-    #     self.orientation.MainAccelerometer()
+    def InitOrientation(self,*args):
+        '''
+        Инициализация сбора телеметрии о положении робота 
+        '''
+        self.orientation = SensorOrientation()
+        self.logger.WritelogSis('Init Orientation')
+        self.orientation.MainAccelerometer()
 
     def main(self):
         '''
@@ -129,8 +129,8 @@ class MainRov:
         # self.mainAmpermetr = threading.Thread(
         #     target=self.InitAmpermert(), args=(self,))
         # # создание потока для сбора показаний с датчиков ориентации 
-        # self.mainOrientations = threading.Thread(
-        #     target=self.InitOrientation, args=(self,))
+        self.mainOrientations = threading.Thread(
+            target=self.InitOrientation, args=(self,))
         # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
         sleep(0.25)
@@ -142,7 +142,7 @@ class MainRov:
         sleep(0.25)
         # self.mainAmpermetr.start()
         # sleep(0.25)
-        # self.mainOrientations.start()
+        self.mainOrientations.start()
         
 
     def variablePrint(self):
