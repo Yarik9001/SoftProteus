@@ -518,7 +518,7 @@ class SensorOrientation:
             self.rov.client.MassOut['x'] = self.mpu.acceleration[0]
             self.rov.client.MassOut['y'] = self.mpu.acceleration[1]
             self.rov.client.MassOut['z'] = self.mpu.acceleration[2]
-            self.rov.client.MassOut['temp'] = self.mpu.temperature[0]
+            self.rov.client.MassOut['temp'] = self.mpu.temperature
             sleep(0.1)
 
 if __name__ == '__main__':
