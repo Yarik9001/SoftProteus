@@ -141,7 +141,7 @@ class MainRov:
             target=self.InitOrientation, args=(self,))
         # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
-        sleep(0.25)
+        sleep(1)
         self.mainlogger.start()
         sleep(0.25)
         self.mainDrk.start()
@@ -498,6 +498,7 @@ class Amperemeter:
         Класс описывающий взаимодействие и опрос датчиков тока 
         '''
         self.rov = rov
+        self.debag = True
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.ads13 = ADS.ADS1115(self.i2c)
         self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
@@ -513,12 +514,19 @@ class Amperemeter:
             a4 = AnalogIn(self.adc46, ADS.P0)
             a5 = AnalogIn(self.adc46, ADS.P1)
             a6 = AnalogIn(self.adc46, ADS.P2)
-            self.rov.client.MassOut['a1'] = a1.value
-            self.rov.client.MassOut['a2'] = a2.value
-            self.rov.client.MassOut['a3'] = a3.value
-            self.rov.client.MassOut['a4'] = a4.value
-            self.rov.client.MassOut['a5'] = a5.value
-            self.rov.client.MassOut['a6'] = a6.value
+            if self.debag:
+                print(a1.value)
+                print(a2.value)
+                print(a3.value)
+                print(a4.value)
+                print(a5.value)
+                print(a6.value)
+            # self.rov.client.MassOut['a1'] = a1.value
+            # self.rov.client.MassOut['a2'] = a2.value
+            # self.rov.client.MassOut['a3'] = a3.value
+            # self.rov.client.MassOut['a4'] = a4.value
+            # self.rov.client.MassOut['a5'] = a5.value
+            # self.rov.client.MassOut['a6'] = a6.value
             sleep(0.1)
 
 
