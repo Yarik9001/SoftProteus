@@ -237,7 +237,7 @@ class ServerMainPult:
         # настройка сервера
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
         self.server.bind((self.HOST, self.PORT))
-        self.server.listen()
+        self.server.listen(1)
         self.user_socket, self.address = self.server.accept()
         self.checkConnect = True
         if self.logcmd:
