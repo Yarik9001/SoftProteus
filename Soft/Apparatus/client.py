@@ -475,34 +475,34 @@ class SocketCameraOut:
                 break
 
 
-# class Amperemeter:
-#     def __init__(self, rov: MainRov):
-#         '''
-#         Класс описывающий взаимодействие и опрос датчиков тока 
-#         '''
-#         self.rov = rov
-#         self.i2c = busio.I2C(board.SCL, board.SDA)
-#         self.ads13 = ADS.ADS1115(self.i2c)
-#         self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
+class Amperemeter:
+    def __init__(self, rov: MainRov):
+        '''
+        Класс описывающий взаимодействие и опрос датчиков тока 
+        '''
+        self.rov = rov
+        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.ads13 = ADS.ADS1115(self.i2c)
+        self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
 
-#     def mainAmperemeter(self):
-#         '''
-#         Функция опроса датчиков тока 
-#         '''
-#         while True:
-#             a1 = AnalogIn(self.ads13, ADS.P0)
-#             a2 = AnalogIn(self.ads13, ADS.P1)
-#             a3 = AnalogIn(self.ads13, ADS.P2)
-#             a4 = AnalogIn(self.adc46, ADS.P0)
-#             a5 = AnalogIn(self.adc46, ADS.P1)
-#             a6 = AnalogIn(self.adc46, ADS.P2)
-#             self.rov.client.MassOut['a1'] = a1.value
-#             self.rov.client.MassOut['a2'] = a2.value
-#             self.rov.client.MassOut['a3'] = a3.value
-#             self.rov.client.MassOut['a4'] = a4.value
-#             self.rov.client.MassOut['a5'] = a5.value
-#             self.rov.client.MassOut['a6'] = a6.value
-#             sleep(0.1)
+    def mainAmperemeter(self):
+        '''
+        Функция опроса датчиков тока 
+        '''
+        while True:
+            a1 = AnalogIn(self.ads13, ADS.P0)
+            a2 = AnalogIn(self.ads13, ADS.P1)
+            a3 = AnalogIn(self.ads13, ADS.P2)
+            a4 = AnalogIn(self.adc46, ADS.P0)
+            a5 = AnalogIn(self.adc46, ADS.P1)
+            a6 = AnalogIn(self.adc46, ADS.P2)
+            self.rov.client.MassOut['a1'] = a1.value
+            self.rov.client.MassOut['a2'] = a2.value
+            self.rov.client.MassOut['a3'] = a3.value
+            self.rov.client.MassOut['a4'] = a4.value
+            self.rov.client.MassOut['a5'] = a5.value
+            self.rov.client.MassOut['a6'] = a6.value
+            sleep(0.1)
 
 
 class SensorOrientation:
