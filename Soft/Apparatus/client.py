@@ -6,21 +6,14 @@ import board
 import busio
 import base64
 import zmq
-# import adafruit_ads1x15.ads1115 as ADS
-# from adafruit_ads1x15.analog_in import AnalogIn
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 from adafruit_servokit import ServoKit
 from time import sleep  # библиотека длязадержек
 from datetime import datetime  # получение текущего времени
 from configparser import ConfigParser  # чтание конфигов
 from ast import literal_eval
-# from mpu6050 import mpu6050
-
-# # import pickle
-# # import struct
-# import pyshine as ps
-# import imutils
-############################################################################
-
+from adafruit_mpu6050 import MPU6050
 
 class MainRov:
     def __init__(self):
@@ -383,7 +376,6 @@ class ROVProteusClient:
     '''
     Класс ответсвенный за связь с постом управления 
     '''
-
     def __init__(self, main: MainRov):
         self.rov = main
         self.HOST = main.host
@@ -452,7 +444,6 @@ class ROVProteusClient:
                 print(data)
 
 
-
 class SocketCameraOut:
     '''
     Класс описывающий прием видео потока с камеры аппарата 
@@ -513,22 +504,22 @@ class SocketCameraOut:
 #             sleep(0.1)
 
 
-# class SensorOrientation:
-#     '''
-#     Класс описывающий опрос датчиков положения x, y, z
-#     '''
-#     def __init__(self, rov: MainRov):
-#         self.rov = rov
-#         self.sensor = mpu6050(0x68)
+class SensorOrientation:
+    '''
+    Класс описывающий опрос акселерометра по осям x, y, z, а так же датчика температуры
+    '''
+    def __init__(self, rov: MainRov):
+        self.rov = rov
+        self.i2c = board.I2C()  
+        self.mpu = MPU6050(self.i2c)
 
-#     def MainAccelerometer(self):
-#         while True:
-#             accelerometer_data = sensor.get_accel_data()
-#             self.rov.client.MassOut['x'] = accelerometer_data['x']
-#             self.rov.client.MassOut['y'] = accelerometer_data['y']
-#             self.rov.client.MassOut['z'] = accelerometer_data['z']
-#             sleep(0.1)
-
+    def MainAccelerometer(self):
+        while True:
+            self.rov.client.MassOut['x'] = self.mpu.acceleration[0]
+            self.rov.client.MassOut['y'] = self.mpu.acceleration[1]
+            self.rov.client.MassOut['z'] = self.mpu.acceleration[2]
+            self.rov.client.MassOut['temp'] = self.mpu.temperature[0]
+            sleep(0.1)
 
 if __name__ == '__main__':
     rov = MainRov()
