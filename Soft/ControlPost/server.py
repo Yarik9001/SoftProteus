@@ -383,7 +383,7 @@ class MyControllerKeyboard:
 
     def up_relaese(self, key):
         self.pult.DataPult['j2-val-y'] = 0
-        self.pult.DataOutput['z'] = 100
+        self.pult.DataOutput['z'] = 0
         if self.pult.logcmd:
             print('up-relaese')
 
