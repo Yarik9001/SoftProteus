@@ -148,9 +148,9 @@ class MainRov:
         sleep(0.25)
         self.mainCamera.start()
         sleep(0.25)
-        self.mainAmpermetr.start()
-        sleep(0.25)
-        self.mainOrientations.start()
+        # self.mainAmpermetr.start()
+        # sleep(0.25)
+        # self.mainOrientations.start()
         
     def variablePrint(self):
         '''
@@ -498,7 +498,7 @@ class Amperemeter:
         Класс описывающий взаимодействие и опрос датчиков тока 
         '''
         self.rov = rov
-        self.debag = True
+        self.debag = False
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.ads13 = ADS.ADS1115(self.i2c)
         self.adc46 = ADS.ADS1115(self.i2c, address=0x49)
