@@ -446,10 +446,88 @@ class MyController(Controller):
     
     '''
 
-    def __init__(self, **kwargs):
-        Controller.__init__(self, **kwargs)
+    def __init__(self, pult: ServerMainPult):
+        Controller.__init__(self,interface="/dev/input/js0", connecting_using_ds4drv=False)
+        self.pult = pult
+        
+    def transp(self, value):
+        return -1 * (value // 328)
+    
+    def on_L3_up(self, value):
+        self.pult.DataPult['j1-val-y'] = -1 * value
+        self.pult.DataOutput['y'] = self.transp(value)
+        if self.pult.logcmd:
+            print('forward')
     
     
+    def on_L3_down(self, value):
+        self.pult.DataPult['j1-val-y'] = -1* value
+        self.pult.DataOutput['y'] = self.transp(value)
+        if self.pult.logcmd:
+            print('back')
+    
+    def on_L3_y_at_rest(self):
+        self.pult.DataPult['j1-val-y'] = 0
+        self.pult.DataOutput['y'] = 0
+        if self.pult.logcmd:
+            print('back')
+            
+    def on_L3_left(self, value):
+        self.pult.DataPult['j1-val-x'] = -1 * value
+        self.pult.DataOutput['x'] = self.transp(value)
+        if self.pult.logcmd:
+            print('left')
+    
+    def on_L3_right(self, value):
+        self.pult.DataPult['j1-val-x'] = -1 * value
+        self.pult.DataOutput['x'] = self.transp(value)
+        if self.pult.logcmd:
+            print('right')
+    
+    def on_L3_x_at_rest(self):
+        self.pult.DataPult['j1-val-x'] = 0
+        self.pult.DataOutput['x'] = 0
+        if self.pult.logcmd:
+            print('right')
+            
+    def on_R3_up(self, value):
+        self.pult.DataPult['j2-val-y'] = -1 * value
+        self.pult.DataOutput['z'] = self.transp(value)
+        if self.pult.logcmd:
+            print('up')
+    
+    def on_R3_down(self, value):
+        self.pult.DataPult['j2-val-y'] = -1 * value
+        self.pult.DataOutput['z'] = self.transp(value)
+        if self.pult.logcmd:
+            print('down')
+            
+    def on_R3_y_at_rest(self):
+        self.pult.DataPult['j2-val-y'] = 0
+        self.pult.DataOutput['z'] = 0
+        if self.pult.logcmd:
+            print('down')
+            
+    def on_R3_left(self, value):
+        self.pult.DataPult['j2-val-x'] = -1 * value
+        self.pult.DataOutput['r'] = self.transp(value)
+        if self.pult.logcmd:
+            print('turn-left')
+            
+    def on_R3_right(self, value):
+        self.pult.DataPult['j2-val-x'] = -1 * value
+        self.pult.DataOutput['r'] = self.transp(value)
+        if self.pult.logcmd:
+            print('turn-left')
+    
+    def on_R3_x_at_rest(self):
+        self.pult.DataPult['j2-val-x'] = 0
+        self.pult.DataOutput['r'] = 0
+        if self.pult.logcmd:
+            print('turn-left')
+            
+    
+
 class LogerTXT:
     '''
     класс для логирования 

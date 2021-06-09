@@ -12,10 +12,9 @@ def disconnect():
 
 class MyController(Controller):
     
-    def __init__(self, rov: ):
+    def __init__(self):
         Controller.__init__(self,interface="/dev/input/js0", connecting_using_ds4drv=False)
         
-    
 
 
 
