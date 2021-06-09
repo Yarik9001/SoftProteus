@@ -130,7 +130,7 @@ class MainRov:
             target=self.InitOrientation, args=(self,))
                 # создание потока для сбора телеметрии с датчиков тока 
         self.mainAmpermetr = threading.Thread(
-            target=self.InitAmpermert(), args=(self,))
+            target=self.InitAmpermert, args=(self,))
         # запуск всех потоков с небольшой задержкой чтобы ве успевало стартануть 
         self.mainClient.start()
         sleep(0.25)
