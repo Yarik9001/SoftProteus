@@ -450,9 +450,6 @@ class MyController(Controller):
         Controller.__init__(self, **kwargs)
     
     
-
-
-
 class LogerTXT:
     '''
     класс для логирования 
