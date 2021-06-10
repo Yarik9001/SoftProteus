@@ -6,7 +6,7 @@ import numpy as np
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM,)
-server.bind(("127.0.0.1", 1234))
+server.bind(("192.168.1.102", 1234))
 server.listen()
 print("Server is start and listening")
 

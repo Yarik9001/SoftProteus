@@ -1,0 +1,10 @@
+NameRov: Proteus0
+Time: 2021-06-10-16-50-29-549918
+2021-06-10 16:50:29.550898 - Start the MainRovPult
+2021-06-10 16:50:29.550962 - Init config
+2021-06-10 16:50:29.551016 - Starting threading
+2021-06-10 16:50:29.551292 - Init server
+2021-06-10 16:50:29.802049 - Init logger
+2021-06-10 16:50:31.681660 - Init CameraIn
+2021-06-10 16:50:32.250445 - Init APP
+2021-06-10 16:50:32.250375 - Init InitJoystick

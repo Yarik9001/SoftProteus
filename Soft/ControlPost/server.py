@@ -126,8 +126,8 @@ class MainRovPult:
     # инициализация джойстика ps4
     def InitJoystick(self, *args):
         self.logger.WritelogSis('Init InitJoystick')
-        controller = MyController(
-            interface="/dev/input/js0", connecting_using_ds4drv=False)
+        controller = MyController(self.server)
+        print('init ps4')
         controller.listen()
 
     # инициализация управления с помощью клавиатуры
@@ -151,16 +151,9 @@ class MainRovPult:
     # инициализация основного цикла
     def MAIN(self):
         self.logger.WritelogSis('Starting threading')
+        
         self.mainserver = threading.Thread(
             target=self.InitServer, args=(self,))
-
-        if self.checkControllerPS4:
-            self.mainJoistik = threading.Thread(
-                target=self.InitJoystick, args=(self,))
-        else:
-            self.logger.WritelogSis('None Joystick')
-            if self.logcmd:
-                print('Error none Joystick')
 
         self.mainLogger = threading.Thread(
             target=self.InitLogger, args=(self,))
@@ -170,19 +163,20 @@ class MainRovPult:
         
         self.mainCamIn = threading.Thread(
             target=self.InitCamIn, args=(self,))
+        
+        self.mainPS4 = threading.Thread(
+            target=self.InitJoystick,args=(self,))
 
         self.mainserver.start()
         sleep(0.25)  # тяжкая инициализация
         self.mainLogger.start()
         sleep(0.25)
-        self.mainKeyboard.start()
+        #self.mainKeyboard.start()
+        # sleep(0.25)
+        # self.mainCamIn.start()
         sleep(0.25)
-        self.mainCamIn.start()
-        sleep(0.25)
-        if self.checkControllerPS4:
-            self.mainJoistik.start()
-
-        self.InitApp()
+        self.mainPS4.start()
+        # self.InitApp()
 
 
 class ServerMainPult:
@@ -259,8 +253,7 @@ class ServerMainPult:
             self.DataInput = dict(literal_eval(str(data.decode('utf-8'))))
             if self.logcmd:
                 print("DataInput-", self.DataInput)
-            print(self.DataInput)
-
+            
     def ControlProteus(self, *args):
         '''
         Отправка управляющей информации на аппарат через равные промежутки времени.
@@ -274,6 +267,7 @@ class ServerMainPult:
             if self.logcmd:
                 print('DataOutput-', self.DataOutput)
             sleep(self.JOYSTICKRATE)
+            print(self.DataOutput)
 
     def startmultithreading(self):
         # инициализация потоков приема и передачи
