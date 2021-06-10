@@ -1,7 +1,5 @@
 import socket
 import cv2
-# import pickle
-# import struct  # модуль для взаимодействия по сети
 import threading  # модуль для разделения на потоки
 from datetime import datetime  # получение  времени
 import pyshine as ps
@@ -220,7 +218,8 @@ class ServerMainPult:
                            'led': False,  # управление светом
                            'manipul': 0,  # Управление манипулятором
                            'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
-                           'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
+                           'servo-x2': 0, 'servo-y2': 0,  # управление подвесом обзорной камеры
+                           'ly-cor': 0, 'lx-cor':0, 'ry-cor':0, 'rx-cor': 0 # корректировки нулевого положения (по заявке от шефа)
                            }
         self.DataInput = {
             'time': None,
@@ -526,8 +525,39 @@ class MyController(Controller):
         if self.pult.logcmd:
             print('turn-left')
             
+    def on_x_press(self):
+        self.pult.DataOutput['ry-cor'] -= 10
+        
+    def on_triangle_press(self):
+        self.pult.DataOutput['ry-cor'] += 10
     
+    def on_square_press(self):
+        self.pult.DataOutput['rx-cor'] += 10
+        
+    def on_circle_press(self):
+        self.pult.DataOutput['rx-cor'] -= 10
 
+    def on_up_arrow_press(self):
+        self.pult.DataOutput['ly-cor'] -= 10
+    
+    def on_down_arrow_press(self):
+        self.pult.DataOutput['ly-cor'] += 10
+    
+    def on_left_arrow_press(self):
+        self.pult.DataOutput["lx-cor"] -= 10
+    
+    def on_right_arrow_press(self):
+        self.pult.DataOutput['lx-cor'] += 10
+        
+    def on_playstation_button_press(self):
+        self.pult.DataOutput['ly-cor'] = 0
+        self.pult.DataOutput['lx-cor'] = 0
+        self.pult.DataOutput['rx-cor'] = 0
+        self.pult.DataOutput['ry-cor'] = 0
+        
+
+            
+    
 class LogerTXT:
     '''
     класс для логирования 

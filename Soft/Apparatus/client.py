@@ -399,7 +399,8 @@ class ROVProteusClient:
                           'led': False,  # управление светом
                           'manipul': 0,  # Управление манипулятором
                           'servo-x1': 0, 'servo-y1': 0,  # управление подвесом курсовой камеры
-                          'servo-x2': 0, 'servo-y2': 0  # управление подвесом обзорной камеры
+                          'servo-x2': 0, 'servo-y2': 0, # управление подвесом обзорной камеры
+                          'ly-cor': 0, 'lx-cor':0, 'ry-cor':0, 'rx-cor': 0
                           }
 
     def settingClient(self):
