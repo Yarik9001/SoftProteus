@@ -11,6 +11,7 @@ from time import sleep  # сон
 from ast import literal_eval  # модуль для перевода строки в словарик
 from configparser import ConfigParser  # мудуль для работы с конфиг файлами
 from os import system
+print(123)
 # модуль для работы с джойстиком ps2
 try:
     from pyPS4Controller.controller import Controller
