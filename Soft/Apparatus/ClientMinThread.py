@@ -87,8 +87,8 @@ class MainRov:
     def RunClientReceivin(self, *args):
         while True:
             self.MassInput = self.client.ClientReceivin()
-            self.logger.WritelogInput(self.data)
-            self.drk.main_motor(self.data)
+            self.logger.WritelogInput(self.MassInput)
+            self.drk.main_motor(self.MassInput)
             
     
     def RunClientDispatch(self, *args):
@@ -131,9 +131,9 @@ class ROVProteusClient:
         '''
         Функция для  отправки пакетов на пульт 
         '''
+        MassOut['time'] = str(datetime.now())
         if self.logcmd:
             print(MassOut)
-        MassOut['time'] = str(datetime.now())
         DataOutput = str(MassOut).encode("utf-8")
         self.client.send(DataOutput)
         
