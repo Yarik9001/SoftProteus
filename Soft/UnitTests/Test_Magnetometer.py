@@ -1,76 +1,26 @@
-import smbus		#import SMBus module of I2C
-from time import sleep  #import sleep
-import math
+import time
+from mpu9250_jmdev.registers import *
+from mpu9250_jmdev.mpu_9250 import MPU9250
 
-#some MPU6050 Registers and their Address
-Register_A     = 0              #Address of Configuration register A
-Register_B     = 0x01           #Address of configuration register B
-Register_mode  = 0x02           #Address of mode register
+mpu = MPU9250(
+    address_ak=AK8963_ADDRESS, 
+    address_mpu_master=MPU9050_ADDRESS_68, # In 0x68 Address
+    address_mpu_slave=None, 
+    bus=1,
+    gfs=GFS_1000, 
+    afs=AFS_8G, 
+    mfs=AK8963_BIT_16, 
+    mode=AK8963_MODE_C100HZ)
 
-X_axis_H    = 0x03              #Address of X-axis MSB data register
-Z_axis_H    = 0x05              #Address of Z-axis MSB data register
-Y_axis_H    = 0x07              #Address of Y-axis MSB data register
-declination = -0.00669          #define declination angle of location where measurement going to be done
-pi          = 3.14159265359     #define pi value
-
-
-def Magnetometer_Init():
-        #write to Configuration Register A
-        bus.write_byte_data(Device_Address, Register_A, 0x70)
-
-        #Write to Configuration Register B for gain
-        bus.write_byte_data(Device_Address, Register_B, 0xa0)
-
-        #Write to mode Register for selecting mode
-        bus.write_byte_data(Device_Address, Register_mode, 0)
-	
-	
-
-def read_raw_data(addr):
-    
-        #Read raw 16-bit value
-        high = bus.read_byte_data(Device_Address, addr)
-        low = bus.read_byte_data(Device_Address, addr+1)
-
-        #concatenate higher and lower value
-        value = ((high << 8) | low)
-
-        #to get signed value from module
-        if(value > 32768):
-            value = value - 65536
-        return value
-
-
-bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
-
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-Device_Address = 0x1e   # HMC5883L magnetometer device address
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-Magnetometer_Init()     # initialize HMC5883L magnetometer 
-
-print (" Reading Heading Angle")
+mpu.configure() # Apply the settings to the registers.
 
 while True:
-    
-	
-        #Read Accelerometer raw value
-        x = read_raw_data(X_axis_H)
-        z = read_raw_data(Z_axis_H)
-        y = read_raw_data(Y_axis_H)
 
-        heading = math.atan2(y, x) + declination
-        
-        #Due to declination check for >360 degree
-        if(heading > 2*pi):
-                heading = heading - 2*pi
+    print("|.....MPU9250 in 0x68 Address.....|")
+    print("Accelerometer", mpu.readAccelerometerMaster())
+    print("Gyroscope", mpu.readGyroscopeMaster())
+    print("Magnetometer", mpu.readMagnetometerMaster())
+    print("Temperature", mpu.readTemperatureMaster())
+    print("\n")
 
-        #check for sign
-        if(heading < 0):
-                heading = heading + 2*pi
-
-        #convert into angle
-        heading_angle = int(heading * 180/pi)
-
-        print ("Heading Angle = %d°" %heading_angle)
-        sleep(1)
+    time.sleep(1)
