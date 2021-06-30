@@ -21,21 +21,21 @@ class Acp:
         a6 = AnalogIn(self.adc46, ADS.P2)
         
         masscor1init = [[],[],[],[],[],[]]
-        for i in range(5):
+        for i in range(10):
             masscor1init[0].append(a1.value)
             masscor1init[1].append(a2.value)
             masscor1init[2].append(a3.value)
             masscor1init[3].append(a4.value)
             masscor1init[4].append(a5.value)
             masscor1init[5].append(a6.value)
-            sleep(0.1)
+            sleep(0.25)
             
-        self.CorNulA1 = sum(masscor1init[0]) / 5
-        self.CorNulA2 = sum(masscor1init[1]) / 5
-        self.CorNulA3 = sum(masscor1init[2]) / 5
-        self.CorNulA4 = sum(masscor1init[3]) / 5
-        self.CorNulA5 = sum(masscor1init[4]) / 5
-        self.CorNulA6 = sum(masscor1init[5]) / 5
+        self.CorNulA1 = int(sum(masscor1init[0]) / 10)
+        self.CorNulA2 = int(sum(masscor1init[1]) / 10)
+        self.CorNulA3 = int(sum(masscor1init[2]) / 10)
+        self.CorNulA4 = int(sum(masscor1init[3]) / 10)
+        self.CorNulA5 = int(sum(masscor1init[4]) / 10)
+        self.CorNulA6 = int(sum(masscor1init[5]) / 10)
 
             
 
@@ -50,7 +50,7 @@ class Acp:
         a5 = AnalogIn(self.adc46, ADS.P1)
         a6 = AnalogIn(self.adc46, ADS.P2)
         # Потенциально кривой матан
-        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.00057321919 * 3, 3)
+        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.00057321919 * 5.3, 3)
         MassOut['a2'] = round((a2.value - self.CorNulA2) * 0.00057321919, 3)
         MassOut['a3'] = round((a3.value - self.CorNulA3) * 0.00057321919, 3)
         MassOut['a4'] = round((a4.value - self.CorNulA4) * 0.00057321919, 3)
