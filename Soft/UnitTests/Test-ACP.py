@@ -50,6 +50,7 @@ class Acp:
 if __name__ == '__main__':
     testacp = Acp()
     while True:
-        mass = testacp.ReadAmperemeter()
+        mass = {}
+        mass = testacp.ReadAmperemeter(mass)
         print(mass['a1'])
         sleep(0.5)
