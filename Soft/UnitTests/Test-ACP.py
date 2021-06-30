@@ -19,13 +19,25 @@ class Acp:
         a4 = AnalogIn(self.adc46, ADS.P0)
         a5 = AnalogIn(self.adc46, ADS.P1)
         a6 = AnalogIn(self.adc46, ADS.P2)
+        
+        masscor1init = [[],[],[],[],[],[]]
+        for i in range(5):
+            masscor1init[0].append(a1.value)
+            masscor1init[1].append(a2.value)
+            masscor1init[2].append(a3.value)
+            masscor1init[3].append(a4.value)
+            masscor1init[4].append(a5.value)
+            masscor1init[5].append(a6.value)
+            sleep(0.1)
+            
+        self.CorNulA1 = sum(masscor1init[0]) / 5
+        self.CorNulA2 = sum(masscor1init[1]) / 5
+        self.CorNulA3 = sum(masscor1init[2]) / 5
+        self.CorNulA4 = sum(masscor1init[3]) / 5
+        self.CorNulA5 = sum(masscor1init[4]) / 5
+        self.CorNulA6 = sum(masscor1init[5]) / 5
 
-        self.CorNulA1 = a1.value
-        self.CorNulA2 = a2.value
-        self.CorNulA3 = a3.value
-        self.CorNulA4 = a4.value
-        self.CorNulA5 = a5.value
-        self.CorNulA6 = a6.value
+            
 
     def ReadAmperemeter(self, MassOut: dict):
         '''
