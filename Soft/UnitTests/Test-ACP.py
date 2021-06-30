@@ -38,7 +38,7 @@ class Acp:
         a5 = AnalogIn(self.adc46, ADS.P1)
         a6 = AnalogIn(self.adc46, ADS.P2)
         # Потенциально кривой матан
-        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.00057321919, 3)
+        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.00057321919 * 3, 3)
         MassOut['a2'] = round((a2.value - self.CorNulA2) * 0.00057321919, 3)
         MassOut['a3'] = round((a3.value - self.CorNulA3) * 0.00057321919, 3)
         MassOut['a4'] = round((a4.value - self.CorNulA4) * 0.00057321919, 3)
