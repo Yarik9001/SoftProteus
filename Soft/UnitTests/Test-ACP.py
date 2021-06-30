@@ -64,5 +64,10 @@ if __name__ == '__main__':
     while True:
         mass = {}
         mass = testacp.ReadAmperemeter(mass)
+        print(mass['a1'])
         print(mass['a2'])
+        print(mass['a3'])
+        print(mass['a4'])
+        print(mass['a5'])
+        print(mass['a6'])
         sleep(0.5)
