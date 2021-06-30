@@ -50,12 +50,12 @@ class Acp:
         a5 = AnalogIn(self.adc46, ADS.P1)
         a6 = AnalogIn(self.adc46, ADS.P2)
         # Потенциально кривой матан
-        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.00057321919 * 5.3, 3)
-        MassOut['a2'] = round((a2.value - self.CorNulA2) * 0.00057321919, 3)
-        MassOut['a3'] = round((a3.value - self.CorNulA3) * 0.00057321919, 3)
-        MassOut['a4'] = round((a4.value - self.CorNulA4) * 0.00057321919, 3)
-        MassOut['a5'] = round((a5.value - self.CorNulA5) * 0.00057321919, 3)
-        MassOut['a6'] = round((a6.value - self.CorNulA6) * 0.00057321919, 3)
+        MassOut['a1'] = round((a1.value - self.CorNulA1) * 0.003038061707, 3)
+        MassOut['a2'] = round((a2.value - self.CorNulA2) * 0.003038061707, 3)
+        MassOut['a3'] = round((a3.value - self.CorNulA3) * 0.003038061707, 3)
+        MassOut['a4'] = round((a4.value - self.CorNulA4) * 0.003038061707, 3)
+        MassOut['a5'] = round((a5.value - self.CorNulA5) * 0.003038061707, 3)
+        MassOut['a6'] = round((a6.value - self.CorNulA6) * 0.003038061707, 3)
 
         return MassOut
     
@@ -64,5 +64,5 @@ if __name__ == '__main__':
     while True:
         mass = {}
         mass = testacp.ReadAmperemeter(mass)
-        print(mass['a1'])
+        print(mass['a2'])
         sleep(0.5)
