@@ -70,4 +70,5 @@ if __name__ == '__main__':
         print(mass['a4'])
         print(mass['a5'])
         print(mass['a6'])
+        print('###############')
         sleep(0.5)
