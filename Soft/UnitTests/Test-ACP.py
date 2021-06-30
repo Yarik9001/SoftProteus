@@ -50,12 +50,12 @@ class Acp:
         a5 = AnalogIn(self.adc46, ADS.P1)
         a6 = AnalogIn(self.adc46, ADS.P2)
         # получена точность 0.1
-        MassOut['a1'] = round((a1.value - self.CorNulA1) * -0.003038061707, 2)
-        MassOut['a2'] = round((a2.value - self.CorNulA2) * -0.003038061707, 2)
-        MassOut['a3'] = round((a3.value - self.CorNulA3) * -0.003038061707, 2)
-        MassOut['a4'] = round((a6.value - self.CorNulA6) * -0.003038061707, 2)
-        MassOut['a5'] = round((a5.value - self.CorNulA5) * -0.003038061707, 2)
-        MassOut['a6'] = round((a4.value - self.CorNulA4) * -0.003038061707, 2)
+        MassOut['a1'] = abs(round((a1.value - self.CorNulA1) * -0.003038061707, 2))
+        MassOut['a2'] = abs(round((a2.value - self.CorNulA2) * -0.003038061707, 2))
+        MassOut['a3'] = abs(round((a3.value - self.CorNulA3) * -0.003038061707, 2))
+        MassOut['a4'] = abs(round((a6.value - self.CorNulA6) * -0.003038061707, 2))
+        MassOut['a5'] = abs(round((a5.value - self.CorNulA5) * -0.003038061707, 2))
+        MassOut['a6'] = abs(round((a4.value - self.CorNulA4) * -0.003038061707, 2))
 
         return MassOut
     
