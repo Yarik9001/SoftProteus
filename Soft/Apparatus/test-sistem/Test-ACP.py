@@ -37,32 +37,35 @@ class Acp:
 def main():
     print('Start main program')
     tester = Acp()
-    check = True
-    while check:
+
+    while True:
         if tester.Read()['voltage'] <= 7:
             continue
-        StartTime = datetime.now
-        print('Start test')
-        print(StartTime)
-        fileLog = open(str(StartTime), "a+")
-        massdata = {'I':0, 'time':0}
-        while tester.Read()['voltage'] >= 9 or tester.Read['amper'] >= 0.5:
-            
-            v = tester.Read()['voltage']
-            a = tester.Read()['amper']
-            massdata['I'] += round(a * 0.28, 2)
-            massdata['time'] += 1
-            
-            data = '    '.join([str(massdata['time']), str(v), str(a), str(massdata['I'])])
-            print(data) 
-            fileLog.write(f'{data}\n')
-            
-            sleep(1)
         else:
-            print('Final:  ', massdata)
-            check = False
             break
 
+    StartTime = datetime.now()
+    print('Start test')
+    print(StartTime)
+    name = str(StartTime) + '.txt'
+    fileLog = open(name, "a+")
+    massdata = {'I':0, 'time':0}
+    while tester.Read()['voltage'] >= 9 or tester.Read()['amper'] >= 0.5:
+
+        v = tester.Read()['voltage']
+        a = tester.Read()['amper']
+        massdata['I'] += round(a * 0.28, 2)
+        massdata['time'] += 1
+        i = str(massdata['I'])
+            
+        data = '    '.join([str(massdata['time']), str(v), str(a), i[:i.index('.') + 2]])
+        print(data) 
+        fileLog.write(f'{data}\n')
+        
+        sleep(1)
+        
+    print('Final:  ', massdata)
+    fileLog.close()
 
 
 if __name__ == '__main__':
