@@ -47,7 +47,8 @@ def main():
     StartTime = datetime.now()
     print('Start test')
     print(StartTime)
-    fileLog = open(str(StartTime), "a+")
+    name = str(StartTime) + '.txt'
+    fileLog = open(name, "a+")
     massdata = {'I':0, 'time':0}
     while tester.Read()['voltage'] >= 9 or tester.Read()['amper'] >= 0.5:
 
