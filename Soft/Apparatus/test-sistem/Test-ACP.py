@@ -53,7 +53,7 @@ def main():
             massdata['I'] += round(a * 0.28, 2)
             massdata['time'] += 1
             
-            data = '    '.join(str(massdata['time']), str(v), str(a), str(massdata['I']))
+            data = '    '.join([str(massdata['time']), str(v), str(a), str(massdata['I'])])
             print(data) 
             fileLog.write(f'{data}\n')
             
