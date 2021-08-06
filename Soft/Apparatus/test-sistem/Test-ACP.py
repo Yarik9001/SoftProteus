@@ -45,7 +45,7 @@ def main():
         print('Start test')
         print(StartTime)
         fileLog = open(str(StartTime), "a+")
-        massdata = {}
+        massdata = {'I':0, 'time':0}
         while tester.Read()['voltage'] >= 9 or tester.Read['amper'] >= 0.5:
             
             v = tester.Read()['voltage']
