@@ -62,11 +62,7 @@ def main():
     print('Stert main program')
     drk = DrkMotor()
     tester = Acp()
-    while True:
-        if tester.Read()['amper'] <= 0.5:
-            continue
-        else:
-            break
+
     StartTime = datetime.now()
     print('Start test')
     print(StartTime)
@@ -76,25 +72,27 @@ def main():
     for i in range(87,181):
         massdata['amper'] = tester.Read()['amper']
         massdata['value'] = i 
-        drk.drk0.angle(i)
+        drk.drk0.angle = i
         print(massdata)
-        data = '    '.join([massdata['value'], massdata['amper']])
+        data = '    '.join([str(massdata['value']), str(massdata['amper'])])
         fileLog.write(f'{data}\n')
         sleep(1)
-    for i in range(181,-1,-1):
+    for i in range(180,-1,-1):
         massdata['amper'] = tester.Read()['amper']
         massdata['value'] = i 
-        drk.drk0.angle(i)
+        drk.drk0.angle = i
         print(massdata)
-        data = '    '.join([massdata['value'], massdata['amper']])
+        data = '    '.join([str(massdata['value']), str(massdata['amper'])])
+       
         fileLog.write(f'{data}\n')
         sleep(1)
     for i in range(0,88):
         massdata['amper'] = tester.Read()['amper']
         massdata['value'] = i 
-        drk.drk0.angle(i)
+        drk.drk0.angle = i
         print(massdata)
-        data = '    '.join([massdata['value'], massdata['amper']])
+
+        data = '    '.join([str(massdata['value']), str(massdata['amper'])])
         fileLog.write(f'{data}\n')
         sleep(1)
 
