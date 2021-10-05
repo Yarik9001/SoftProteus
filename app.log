@@ -1,0 +1,35 @@
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This will get logged to a file
+root - WARNING - This is a warning message
+root - ERROR - This is an error message
+root - CRITICAL - This is a critical message
+root - WARNING - This will get logged to a file
+root - DEBUG - This is a debug message
+root - INFO - This is an info message
+root - WARNING - This is a warning message
+root - ERROR - This is an error message
+root - CRITICAL - This is a critical message
+2021-10-05 17:18:24,271 - root - WARNING - This will get logged to a file
+2021-10-05 17:18:24,271 - root - DEBUG - This is a debug message
+2021-10-05 17:18:24,271 - root - INFO - This is an info message
+2021-10-05 17:18:24,271 - root - WARNING - This is a warning message
+2021-10-05 17:18:24,272 - root - ERROR - This is an error message
+2021-10-05 17:18:24,272 - root - CRITICAL - This is a critical message
+The debug
+The info
+The warn
+The error
+The critical
+17:36:07:INFO:The info
+17:36:07:WARNING:The warn
+17:36:07:ERROR:The error
+17:36:07:CRITICAL:The critical
+2021-10-05 17:44:13,205 - INFO - The info
+2021-10-05 17:44:13,205 - WARNING - The warn
+2021-10-05 17:44:13,206 - ERROR - The error
+2021-10-05 17:44:13,206 - CRITICAL - The critical
